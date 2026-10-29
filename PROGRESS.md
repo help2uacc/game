@@ -25,6 +25,7 @@ Verified locally (this environment):
 - Local Android export with the official 4.7.2 templates and a stubbed SDK: the APK packages fine (59.3 MB, both ABIs, permissions + package name present in the manifest). Real signing happens in CI with the runner's Android SDK.
 
 ## Release status
+- Latest: <https://github.com/help2uacc/game/releases/tag/v1.1.0> (owner change requests, PRD §19; versionCode 2).
 - Released: <https://github.com/help2uacc/game/releases/tag/v1.0.0> with `block_brawl.apk` (59.3 MB, debug-signed), built by `.github/workflows/android.yml` run 40895761621.
 - Note: pushing tags from the cloud session is blocked by its git proxy, so the tag was created by the workflow (manual run with `release_tag=v1.0.0`). Pushing a `v*` tag from a normal machine also works.
 
