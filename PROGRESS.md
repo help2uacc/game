@@ -7,11 +7,11 @@ unchecked milestone. Run `tools/check.sh` after every change.
 - [x] M0 Project setup
 - [x] M1 Assets
 - [x] M2 Local sandbox
-- [ ] M3 Combat
+- [x] M3 Combat
 - [ ] M4 Networking
 - [ ] M5 Match flow
 - [ ] M6 UI & polish
 - [ ] M7 Android & performance
 
 ## Current state
-M2 done. Next: M3 (combat: weapons, pickups, auto-aim, hazards, items, spawning).
+M3 done. Next: M4 (networking: NetManager, discovery, lobby, replication, reconnect).

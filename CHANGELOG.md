@@ -21,3 +21,11 @@
 - `TouchControls`: floating joystick, Attack/Jump/Pick Up/Throw buttons, multi-touch, latched presses, debug keyboard (A/D/S/Space/J/K/L).
 - `scenes/main/sandbox.tscn` single-player sandbox; first map `candy_plains`; `tools/author_maps.py`.
 - Tests: physics integration tests (floor, jump/double jump heights, one-way + drop-through, knockback, kill line); GDScript warnings-as-errors lint in `tools/check.sh`.
+
+## M3 — Combat
+- `World` authority simulation: hitscan weapons (pistol, SMG, shotgun pellets with single knockback, sniper), rockets (direct 60, splash falloff, self-damage 50 %), grenades (ballistic arc to target, bounces, 2 s fuse), punch, auto-aim (§7.2: nearest enemy in range with line of sight, facing tie-break), damage armor→HP, knockback, kill credit (§4.3).
+- Pick Up (drop-on-swap with ammo), Throw (15 dmg, knockback 6, lands as pickup with ammo), ammo removal, 30 s ground despawn with 3 s blink, health/armor items (auto pickup, caps).
+- Hazards: lava (instant death), spikes (34 dmg, bounce, 0.5 s invulnerability), crates (30 HP), jump pads (20 m/s), moving platforms; environmental kill credit.
+- Spawning rules (§7.5): 3 weapons at fight start, +1 every 8 s up to 6, items at 30 s then every 20 s up to 2, free-point rule, spawn weights.
+- Event system (`GameEvents`) driving VFX/SFX: pooled cube bursts, tracers, muzzle flash, explosions + shockwave ring, damage numbers, crate break, landing dust, jump-pad puff, screen shake.
+- Tests: 19 combat integration tests.

@@ -28,10 +28,14 @@ func _ready() -> void:
 func _start_sandbox() -> void:
 	world.authority = true
 	world.load_map(sandbox_map)
-	var spawn: Vector3 = world.map.player_spawns[0]
-	var p: Player = world.add_player(1, 0, Settings.player_name if Settings.has_player_name() else "Player", true)
-	p.reset_for_round(spawn)
+	world.add_player(1, 0, Settings.player_name if Settings.has_player_name() else "Player", true)
+	# Two idle training dummies to test weapons on.
+	world.add_player(2, 5, "Dummy", false)
+	world.add_player(3, 3, "Dummy", false)
+	var pids: Array[int] = [1, 2, 3]
+	world.place_players_at_spawns(pids)
 	world.camera.snap_to_target()
+	world.start_fight()
 
 
 func _physics_process(_delta: float) -> void:
@@ -43,4 +47,4 @@ func _physics_process(_delta: float) -> void:
 		controls.ack_presses(true, true, true)
 	var lp: Player = world.local_player()
 	if lp != null:
-		controls.update_context(false, lp.weapon_id)
+		controls.update_context(lp.alive and world.nearest_weapon_pickup(lp) != null, lp.weapon_id)

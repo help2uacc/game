@@ -134,8 +134,8 @@ func _themed_library() -> MeshLibrary:
 		ITEM_BLOCK_ALT: theme.secondary,
 		ITEM_ONE_WAY: theme.platform,
 		ITEM_LAVA: theme.lava,
-		ITEM_DECOR_A: theme.decor_a,
-		ITEM_DECOR_B: theme.decor_b,
+		ITEM_DECOR_A: theme.decor_a.lerp(theme.bg_bottom, 0.35),
+		ITEM_DECOR_B: theme.decor_b.lerp(theme.bg_top, 0.35),
 	}
 	for id: int in BASE_LIBRARY.get_item_list():
 		lib.create_item(id)
@@ -178,7 +178,7 @@ func _build_decor(lib: MeshLibrary) -> void:
 	while x < data.width + 12:
 		var w: int = rng.randi_range(4, 9)
 		var h: int = rng.randi_range(3, 9)
-		var z: int = -rng.randi_range(3, 6)
+		var z: int = -rng.randi_range(4, 7)
 		var item: int = ITEM_DECOR_A if rng.randf() < 0.6 else ITEM_DECOR_B
 		var stepped: bool = rng.randf() < 0.5
 		for i: int in range(w):
