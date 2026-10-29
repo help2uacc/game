@@ -27,14 +27,14 @@ _surfaces = [{
 "vertex_data": PackedByteArray("zczMPs3MTL3NzMw+zczMPs3MTD3NzMy+zczMPs3MTL3NzMy+zczMPs3MTL3NzMw+zczMPs3MTD3NzMw+zczMPs3MTD3NzMy+zczMvs3MTL3NzMy+zczMvs3MTD3NzMw+zczMvs3MTL3NzMw+zczMvs3MTL3NzMy+zczMvs3MTD3NzMy+zczMvs3MTD3NzMw+zczMvs3MTD3NzMw+zczMPs3MTD3NzMy+zczMPs3MTD3NzMw+zczMvs3MTD3NzMw+zczMvs3MTD3NzMy+zczMPs3MTD3NzMy+zczMvs3MTL3NzMy+zczMPs3MTL3NzMw+zczMPs3MTL3NzMy+zczMvs3MTL3NzMy+zczMvs3MTL3NzMw+zczMPs3MTL3NzMw+zczMvs3MTL3NzMw+zczMPs3MTD3NzMw+zczMPs3MTL3NzMw+zczMvs3MTL3NzMw+zczMvs3MTD3NzMw+zczMPs3MTD3NzMw+zczMPs3MTL3NzMy+zczMvs3MTD3NzMy+zczMvs3MTL3NzMy+zczMPs3MTL3NzMy+zczMPs3MTD3NzMy+zczMvs3MTD3NzMy+mpkZPutROD2amRk+mpkZPpmZmT2amRm+mpkZPutROD2amRm+mpkZPutROD2amRk+mpkZPpmZmT2amRk+mpkZPpmZmT2amRm+mpkZvutROD2amRm+mpkZvpmZmT2amRk+mpkZvutROD2amRk+mpkZvutROD2amRm+mpkZvpmZmT2amRm+mpkZvpmZmT2amRk+mpkZvpmZmT2amRk+mpkZPpmZmT2amRm+mpkZPpmZmT2amRk+mpkZvpmZmT2amRk+mpkZvpmZmT2amRm+mpkZPpmZmT2amRm+mpkZvutROD2amRm+mpkZPutROD2amRk+mpkZPutROD2amRm+mpkZvutROD2amRm+mpkZvutROD2amRk+mpkZPutROD2amRk+mpkZvutROD2amRk+mpkZPpmZmT2amRk+mpkZPutROD2amRk+mpkZvutROD2amRk+mpkZvpmZmT2amRk+mpkZPpmZmT2amRk+mpkZPutROD2amRm+mpkZvpmZmT2amRm+mpkZvutROD2amRm+mpkZPutROD2amRm+mpkZPpmZmT2amRm+mpkZvpmZmT2amRm+////f/9//7////9//3//v////3//f/+/////f/9//7////9//3//v////3//f/+/AAD/f/9//78AAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//vwAA/3//f/+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//3//f/9/AID/f/9//38AgP9//3//fwCA/3//f/9/AID/f/9//38AgP9//3//fwCA//////9/AID//////38AgP//////fwCA//////9/AID//////38AgP//////fwCA////f/9//7////9//3//v////3//f/+/////f/9//7////9//3//v////3//f/+/AAD/f/9//78AAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//vwAA/3//f/+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//3//f/9/AID/f/9//38AgP9//3//fwCA/3//f/9/AID/f/9//38AgP9//3//fwCA//////9/AID//////38AgP//////fwCA//////9/AID//////38AgP//////fwCA")
 }]
 
-[node name="JumpPad" type="Node3D" unique_id=386528633]
+[node name="JumpPad" type="Node3D" unique_id=637699089]
 script = ExtResource("1_f5mj0")
 
-[node name="Base" type="MeshInstance3D" parent="." unique_id=503682105]
+[node name="Base" type="MeshInstance3D" parent="." unique_id=1769906334]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_f5mj0")
 
-[node name="Top" type="MeshInstance3D" parent="." unique_id=1530337158]
+[node name="Top" type="MeshInstance3D" parent="." unique_id=1573271544]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32, 0)
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_plxy1")

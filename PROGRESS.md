@@ -41,7 +41,7 @@ PRD §15 lists 14 numbered criteria.
 | 5 | Host leaving returns all clients to main menu with a message | [x] Implemented ("Host left the game" via RPC; on app close; after timeout). Phone test recommended. |
 | 6 | Each round uses a different map; 12 distinct maps exist and validate | [x] 12 maps, `validate_maps.py` + GDScript tests; rotation tests (no immediate repeat). |
 | 7 | Round ends at ≤1 alive or 300 s; round winner/DRAW; match winner by total kills with DRAW | [x] Rules unit tests + smoke test logs. |
-| 8 | 6 weapons, punch, throw, pickup button, drop-on-swap, ammo removal, 30 s despawn, health/armor; auto-aim per §7.2 | [x] 19 combat integration tests. |
+| 8 | 6 weapons, punch, throw, pickup button, drop-on-swap, ammo removal, 30 s despawn, health/armor; manual aim per §7.2 (v1.1), melee combo + cover per §7.1 | [x] 23 combat integration tests. |
 | 9 | Falling off, lava, spikes, crates, jump pads, moving platforms; environmental kill credit | [x] Integration tests (lava, spikes, pads, crates, fall, credit); movers in maps. |
 | 10 | Double jump, one-way drop-through, knockback | [x] Physics integration tests. |
 | 11 | Dead players can spectate and cycle living players | [x] Implemented (arrows + swipe); verify on phone (steps below). |

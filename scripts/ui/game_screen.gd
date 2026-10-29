@@ -148,6 +148,8 @@ func _physics_process(_delta: float) -> void:
 		_bot.read_input(_local_input, world)
 	else:
 		controls.read_input(_local_input)
+		_mouse_aim(lp)
+	hud.local_aim = Vector2(_local_input.aim_x, _local_input.aim_y)
 	_seq += 1
 	_local_input.seq = _seq
 	if world.authority:
@@ -174,6 +176,20 @@ func _physics_process(_delta: float) -> void:
 		if at:
 			_throw_seq = -1
 	controls.update_context(lp.alive and world.nearest_weapon_pickup(lp) != null, lp.weapon_id if lp.alive else 0)
+
+
+## Desktop: the mouse pointer aims (relative to the player's chest) when the
+## touch aim stick is not in use.
+func _mouse_aim(lp: Player) -> void:
+	if OS.has_feature("mobile") or controls.has_touch_aim() or not lp.alive:
+		return
+	var sp: Vector2 = world.camera.unproject_position(lp.chest())
+	var d: Vector2 = get_viewport().get_mouse_position() - sp
+	if d.length() < 40.0:
+		return
+	d = d.normalized()
+	_local_input.aim_x = d.x
+	_local_input.aim_y = -d.y
 
 
 func _process(_delta: float) -> void:

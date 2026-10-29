@@ -272,7 +272,7 @@ func _build_stickman() -> void:
 	tag.name = "NameTag"
 	tag.position = Vector3(0, 2.05, 0)
 	tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	tag.pixel_size = 0.006
+	tag.pixel_size = 0.008
 	tag.font_size = 40
 	tag.outline_size = 14
 	tag.modulate = WHITE
@@ -283,7 +283,7 @@ func _build_stickman() -> void:
 	tag.text = "Player"
 	top.add_child(tag)
 	var marker_mesh := PrismMesh.new()
-	marker_mesh.size = Vector3(0.22, 0.16, 0.05)
+	marker_mesh.size = Vector3(0.3, 0.22, 0.05)
 	var marker := _mesh_node("LocalMarker", marker_mesh, Vector3(0, 0.26, 0))
 	marker.rotation = Vector3(0, 0, PI)
 	marker.material_override = load("res://assets/materials/white.tres")

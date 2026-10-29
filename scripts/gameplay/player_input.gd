@@ -11,6 +11,18 @@ var jump_held: bool = false  # TODO(PRD): transmitted but no behaviour is specif
 var attack_held: bool = false
 var pickup_pressed: bool = false
 var throw_pressed: bool = false
+## Manual aim direction (-1..1 each axis). Zero = no aim: shoot horizontally
+## in the facing direction.
+var aim_x: float = 0.0
+var aim_y: float = 0.0
+
+
+func has_aim() -> bool:
+	return aim_x * aim_x + aim_y * aim_y > 0.04
+
+
+func aim_dir() -> Vector3:
+	return Vector3(aim_x, aim_y, 0).normalized()
 
 
 func copy_from(o: PlayerInput) -> void:
@@ -22,6 +34,8 @@ func copy_from(o: PlayerInput) -> void:
 	attack_held = o.attack_held
 	pickup_pressed = o.pickup_pressed
 	throw_pressed = o.throw_pressed
+	aim_x = o.aim_x
+	aim_y = o.aim_y
 
 
 func clear() -> void:
@@ -33,12 +47,14 @@ func clear() -> void:
 	attack_held = false
 	pickup_pressed = false
 	throw_pressed = false
+	aim_x = 0.0
+	aim_y = 0.0
 
 
 ## Packs into a compact array for the unreliable_ordered input RPC.
 func pack() -> PackedByteArray:
 	var b := PackedByteArray()
-	b.resize(6)
+	b.resize(8)
 	b.encode_u32(0, seq & 0xFFFFFFFF)
 	b.encode_s8(4, clampi(int(round(move_x * 127.0)), -127, 127))
 	var flags: int = 0
@@ -55,6 +71,8 @@ func pack() -> PackedByteArray:
 	if throw_pressed:
 		flags |= 32
 	b.encode_u8(5, flags)
+	b.encode_s8(6, clampi(int(round(aim_x * 127.0)), -127, 127))
+	b.encode_s8(7, clampi(int(round(aim_y * 127.0)), -127, 127))
 	return b
 
 
@@ -71,4 +89,7 @@ static func unpack(b: PackedByteArray) -> PlayerInput:
 	i.attack_held = flags & 8 != 0
 	i.pickup_pressed = flags & 16 != 0
 	i.throw_pressed = flags & 32 != 0
+	if b.size() >= 8:
+		i.aim_x = float(b.decode_s8(6)) / 127.0
+		i.aim_y = float(b.decode_s8(7)) / 127.0
 	return i

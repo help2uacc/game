@@ -23,4 +23,6 @@ enum {
 	THROWN_HIT = 16,   # pos
 	DESPAWN = 17,      # pickup id, pos
 	ROCKET_FIRED = 18, # pid, pos
+	SPAWN_WARN = 19,   # pos, kind (v1.1 spawn telegraph)
+	STUN = 20,         # pid (v1.1 melee disarm + stun)
 }

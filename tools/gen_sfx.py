@@ -79,6 +79,8 @@ SOUNDS = {
     "crate_break": lambda: mix(noise_burst(0.3, 1800, 300, cutoff=1600, seed=21), blip(260, 120, 0.15, duty=0.5, cutoff=1500), sr=SR),
     "jump_pad": lambda: blip(200, 1100, 0.3, "square", duty=0.3, curve=0.5, vibrato=0.05, vib_speed=18),
     "spawn_pop": lambda: seq(blip(600, 1200, 0.06, "sine", cutoff=6000), blip(1200, 900, 0.06, "sine", cutoff=6000)),
+    # v1.1: soft rising shimmer while a spawn point glows.
+    "spawn_warn": lambda: arp([79, 83, 86, 91], 0.09, wave_type="tri", cutoff=5000, tail=0.25),
     "low_time_tick": lambda: blip(1000, 1000, 0.07, "square", duty=0.2, cutoff=4500),
 }
 

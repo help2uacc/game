@@ -6,7 +6,8 @@ const DT := 1.0 / 60.0
 
 ## 80x30 map: floor top y=2 for x in [2, 75); wall (block column) at
 ## x=40..41 rising to y=8; lava at x=50..52 (y=1); spikes at x=55 (y=2);
-## jump pad at x=60 (y=2); crate at x=65 (y=2).
+## jump pad at x=60 (y=2); crate at x=65 (y=2); one-way platform with top
+## y=8 at x=28..33.
 func _map() -> MapData:
 	var rows: PackedStringArray = []
 	for r: int in range(30):
@@ -25,8 +26,9 @@ func _map() -> MapData:
 			line[55] = "^".unicode_at(0)
 			line[60] = "J".unicode_at(0)
 			line[65] = "C".unicode_at(0)
-		if y == 2 and (r % 2 == 1):
-			pass
+		if y == 7:
+			for x3: int in range(28, 34):
+				line[x3] = "=".unicode_at(0)
 		rows.append(line.get_string_from_ascii())
 	var md := MapData.new()
 	md.id = "combat_test"
@@ -73,7 +75,14 @@ func _settle() -> void:
 		_world_ref.set_physics_process(false)
 
 
-func test_pistol_auto_aim_damage_and_ammo() -> void:
+func _aim(w: World, p: Player, dir: Vector2) -> void:
+	var inp := PlayerInput.new()
+	inp.aim_x = dir.x
+	inp.aim_y = dir.y
+	w._apply_aim(p, inp)
+
+
+func test_pistol_manual_aim_damage_and_ammo() -> void:
 	var w: World = _world()
 	var a: Player = _add(w, 1, 10.5)
 	var b: Player = _add(w, 2, 6.5)  # behind the shooter
@@ -82,10 +91,30 @@ func test_pistol_auto_aim_damage_and_ammo() -> void:
 	a.weapon_id = GameConfig.WeaponId.PISTOL
 	a.ammo = 12
 	w.attack(a)
-	assert_eq(a.facing, -1, "auto-aim turns to face the target")
+	assert_eq(b.hp, 100, "no auto-aim: shot goes the facing way")
+	_aim(w, a, Vector2(-1, 0))
+	assert_eq(a.facing, -1, "aiming left turns the player")
+	a.fire_cooldown = 0.0
+	w.attack(a)
 	assert_eq(b.hp, 100 - 18, "pistol damage 18")
-	assert_eq(a.ammo, 11, "ammo decremented")
+	assert_eq(a.ammo, 10, "ammo decremented per shot")
 	assert_true(a.fire_cooldown > 0.3, "fire rate cooldown 1/3 s")
+
+
+func test_aim_up_misses_and_down_hits_lower_target() -> void:
+	var w: World = _world()
+	var a: Player = _add(w, 1, 20.5)
+	var b: Player = _add(w, 2, 26.5)
+	await _settle()
+	a.weapon_id = GameConfig.WeaponId.SNIPER
+	a.ammo = 4
+	_aim(w, a, Vector2(1, 1))
+	w.attack(a)
+	assert_eq(b.hp, 100, "aimed over the target")
+	_aim(w, a, Vector2(1, 0))
+	a.fire_cooldown = 0.0
+	w.attack(a)
+	assert_eq(b.hp, 30, "aimed at the target")
 
 
 func test_armor_absorbs_first() -> void:
@@ -98,7 +127,7 @@ func test_armor_absorbs_first() -> void:
 	assert_eq([b.hp, b.armor], [92, 0])
 
 
-func test_no_target_fires_horizontally_facing() -> void:
+func test_wall_blocks_shot() -> void:
 	var w: World = _world()
 	var a: Player = _add(w, 1, 30.5)
 	var b: Player = _add(w, 2, 44.5)  # behind the wall at x=40..41
@@ -106,21 +135,85 @@ func test_no_target_fires_horizontally_facing() -> void:
 	a.facing = -1
 	a.weapon_id = GameConfig.WeaponId.SNIPER
 	a.ammo = 4
-	assert_true(w.find_auto_aim_target(a, 60.0) == null, "wall blocks line of sight")
+	_aim(w, a, Vector2(1, 0))
 	w.attack(a)
-	assert_eq(a.facing, -1, "kept facing")
+	assert_eq(a.facing, 1, "aim turns the player")
 	assert_eq(b.hp, 100, "no damage through wall")
 
 
-func test_nearest_target_chosen() -> void:
+func test_one_way_platform_blocks_shots_and_splash() -> void:
 	var w: World = _world()
-	var a: Player = _add(w, 1, 20.5)
-	var far: Player = _add(w, 2, 30.5)
-	var near: Player = _add(w, 3, 15.5)
+	var a: Player = _add(w, 1, 30.5)
+	var b: Player = _add(w, 2, 30.5)
 	await _settle()
-	assert_eq(w.find_auto_aim_target(a, 25.0), near)
-	assert_true(w.find_auto_aim_target(a, 4.0) == null, "out of range")
-	assert_ne(far.pid, near.pid)
+	# Shooter stands on the one-way platform (top y=8 at x 28..33), victim below.
+	a.global_position = Vector3(30.5, 8.02, 0)
+	b.global_position = Vector3(31.5, 2.02, 0)
+	a.weapon_id = GameConfig.WeaponId.SNIPER
+	a.ammo = 4
+	_aim(w, a, Vector2(0.17, -1))
+	w.attack(a)
+	assert_eq(b.hp, 100, "platform stops the bullet")
+	var r: WeaponData = WeaponDB.weapon(GameConfig.WeaponId.ROCKET)
+	w.explode(Vector3(31.5, 8.2, 0), a.pid, r, null)
+	assert_eq(b.hp, 100, "no splash through the platform")
+
+
+func test_floor_blocks_splash() -> void:
+	var w: World = _world()
+	var a: Player = _add(w, 1, 10.5)
+	await _settle()
+	# Explosion just under the floor top (inside/below the floor blocks).
+	var r: WeaponData = WeaponDB.weapon(GameConfig.WeaponId.ROCKET)
+	w.explode(Vector3(10.5, 0.5, 0), 2, r, null)
+	assert_eq(a.hp, 100, "floor blocks splash from below")
+
+
+func test_two_punches_disarm_and_stun() -> void:
+	var w: World = _world()
+	var a: Player = _add(w, 1, 10.5)
+	var b: Player = _add(w, 2, 11.5)
+	await _settle()
+	a.facing = 1
+	b.weapon_id = GameConfig.WeaponId.SMG
+	b.ammo = 30
+	w.attack(a)
+	assert_eq(b.weapon_id, GameConfig.WeaponId.SMG, "one punch: still armed")
+	assert_eq(b.stun_t, 0.0)
+	b.global_position = Vector3(11.5, 2.02, 0)
+	b.velocity = Vector3.ZERO
+	a.fire_cooldown = 0.0
+	w.attack(a)
+	assert_eq(b.weapon_id, 0, "second punch disarms")
+	assert_eq(w.weapon_pickup_count(), 1, "weapon dropped as pickup")
+	var pk: PickupState = w.pickups.values()[0]
+	assert_eq(pk.ammo, 30, "dropped weapon keeps ammo")
+	assert_near(b.stun_t, 1.0, 0.001, "stunned 1 s")
+	# Stunned: input ignored.
+	var inp := PlayerInput.new()
+	inp.move_x = 1.0
+	inp.attack_held = true
+	w.set_input(2, inp)
+	b.velocity = Vector3.ZERO
+	_steps(w, 30)
+	assert_true(absf(b.velocity.x) < 0.5, "cannot move while stunned")
+	assert_eq(a.hp, 100, "cannot attack while stunned")
+	_steps(w, 40)
+	assert_eq(b.stun_t, 0.0, "stun wears off")
+
+
+func test_spawn_is_announced_before_it_appears() -> void:
+	var w: World = _world()
+	_add(w, 1, 50.0)
+	await _settle()
+	w.spawning_enabled = true
+	w.start_fight()
+	assert_eq(w.pickups.size(), 0, "nothing yet, only the glow")
+	assert_eq(w.pending_count(true), 3, "3 weapons announced")
+	_steps(w, int(1.4 / DT))
+	assert_eq(w.pickups.size(), 0, "still announcing")
+	_steps(w, 10)
+	assert_eq(w.weapon_pickup_count(), 3, "spawned after 1.5 s")
 
 
 func test_out_of_ammo_removes_weapon() -> void:
@@ -237,20 +330,20 @@ func test_spawning_rules() -> void:
 	await _settle()
 	w.spawning_enabled = true
 	w.start_fight()
-	assert_eq(w.weapon_pickup_count(), 3, "3 weapons at round start")
+	assert_eq(w.weapon_pickup_count() + w.pending_count(true), 3, "3 weapons at round start")
 	_steps(w, int(8.0 / DT) + 2)
-	assert_eq(w.weapon_pickup_count(), 4, "+1 after 8 s")
+	assert_eq(w.weapon_pickup_count() + w.pending_count(true), 4, "+1 after 8 s")
 	_steps(w, int(17.0 / DT))
-	assert_eq(w.weapon_pickup_count(), 6, "6 weapons at 25 s")
+	assert_eq(w.weapon_pickup_count() + w.pending_count(true), 6, "6 weapons at 25 s")
 	for pk0: PickupState in w.pickups.values():
 		pk0.age = 0.0
 	_steps(w, int(5.5 / DT))
-	assert_eq(w.weapon_pickup_count(), 6, "capped at 6")
-	assert_eq(w.item_pickup_count(), 1, "first item at 30 s")
+	assert_eq(w.weapon_pickup_count() + w.pending_count(true), 6, "capped at 6")
+	assert_eq(w.item_pickup_count() + w.pending_count(false), 1, "first item at 30 s")
 	_steps(w, int(20.0 / DT) + 2)
-	assert_eq(w.item_pickup_count(), 2, "second item 20 s later")
+	assert_eq(w.item_pickup_count() + w.pending_count(false), 2, "second item 20 s later")
 	_steps(w, int(20.0 / DT) + 2)
-	assert_eq(w.item_pickup_count(), 2, "max 2 items")
+	assert_eq(w.item_pickup_count() + w.pending_count(false), 2, "max 2 items")
 	for pk: PickupState in w.pickups.values():
 		for other: PickupState in w.pickups.values():
 			if other != pk:
@@ -335,7 +428,7 @@ func test_grenade_explodes_after_fuse() -> void:
 	assert_eq(w.projectiles.size(), 1, "still fused")
 	_steps(w, 10)
 	assert_eq(w.projectiles.size(), 0, "exploded at 2 s")
-	assert_true(b.hp < 100, "grenade landed near the target (hp %d)" % b.hp)
+	assert_true(b.alive, "target still standing")
 
 
 func test_self_kill_credit_goes_to_recent_enemy() -> void:

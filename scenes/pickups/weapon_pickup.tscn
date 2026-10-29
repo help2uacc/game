@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" path="res://scripts/visual/pickup_view.gd" id="1_s5sdq"]
 
-[node name="WeaponPickup" type="Node3D" unique_id=2061698652]
+[node name="WeaponPickup" type="Node3D" unique_id=530059947]
 script = ExtResource("1_s5sdq")
 
-[node name="Model" type="Node3D" parent="." unique_id=503826959]
+[node name="Model" type="Node3D" parent="." unique_id=1329455188]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)

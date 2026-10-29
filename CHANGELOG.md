@@ -55,3 +55,13 @@
 - Debug overlay (F3 / 4-finger tap, debug builds): FPS, draw calls, primitives, ping, snapshot size.
 - Android export verified locally with the official 4.7.2 templates (both ABIs, permissions, package name, icons; 59.3 MB APK); GitHub Actions workflow builds, signs (debug) and attaches the APK to tag releases.
 - `TODO(PRD)` markers for every documented PRD gap; README (engine version, editor/multi-instance testing, APK install, new builds, release keystore), acceptance checklist with manual phone test steps in `PROGRESS.md`.
+
+## v1.1.0 — Owner change requests
+- Manual aiming replaces auto-aim: drag from the Attack button to aim (mouse on desktop); aim vector in the input packet (8 bytes); dotted aim line for the local player; grenades thrown along the aim.
+- Camera zoomed out to Z = +40 m (~29 m wide); larger name tags.
+- Spawn telegraph: glowing column + sparkles + `spawn_warn` SFX 1.5 s before every weapon/item spawn.
+- Bigger touch buttons (Attack 230, Jump 190, Pick Up 170, Throw 150, Menu 120 px) and spectate arrows.
+- Cover: one-way platforms now stop shots/projectiles (ray-only collision layer); explosion splash needs line of sight; punches need line of sight.
+- Melee combo: 2 punches within 3 s disarm (weapon drops with ammo) and stun for 1 s (wobble + orbiting stars, replicated in snapshots).
+- Smoother visuals: blended limb poses, eased facing turn, smoothed weapon aim + recoil kick, take-off stretch, fading tracers.
+- PRD updated (§19); tests for manual aim, cover, melee combo and spawn telegraph (75 tests).

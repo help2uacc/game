@@ -114,6 +114,7 @@ func build(map_data: MapData, decorations: bool, parallax: bool, particle_factor
 				hazards.add_child(lava)
 				lava.setup(lava_run, theme.lava, particle_factor)
 				lava_run = 0
+	_build_shot_blockers()
 	var mover_mat: ShaderMaterial = MaterialCache.flat(theme.platform.darkened(0.08))
 	for m: Dictionary in data.movers:
 		var mover: MovingPlatform = MOVER_SCENE.instantiate()
@@ -125,6 +126,34 @@ func build(map_data: MapData, decorations: bool, parallax: bool, particle_factor
 		_build_decor(lib)
 	if parallax:
 		_build_far_layer(lib)
+
+
+## One-way platforms are not solid for players (custom landing logic) but
+## must stop shots, splash and thrown objects (v1.1): static boxes on
+## collision layer 4 (value 8), which only ray queries look at.
+func _build_shot_blockers() -> void:
+	var body := StaticBody3D.new()
+	body.name = "ShotBlockers"
+	body.collision_layer = 8
+	body.collision_mask = 0
+	add_child(body)
+	for row: int in range(data.height):
+		var x: int = 0
+		while x < data.width:
+			if data.rows[row][x] != "=":
+				x += 1
+				continue
+			var x0: int = x
+			while x < data.width and data.rows[row][x] == "=":
+				x += 1
+			var run: int = x - x0
+			var top: float = float(data.height - row)
+			var cs := CollisionShape3D.new()
+			var box := BoxShape3D.new()
+			box.size = Vector3(float(run), GameConfig.ONE_WAY_THICKNESS, 1.0)
+			cs.shape = box
+			cs.position = Vector3(float(x0) + float(run) * 0.5, top - GameConfig.ONE_WAY_THICKNESS * 0.5, 0)
+			body.add_child(cs)
 
 
 func _themed_library() -> MeshLibrary:

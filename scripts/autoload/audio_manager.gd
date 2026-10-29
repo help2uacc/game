@@ -33,7 +33,7 @@ func _ready() -> void:
 	for i: int in range(POOL_3D):
 		var p3 := AudioStreamPlayer3D.new()
 		p3.bus = "SFX"
-		p3.unit_size = 12.0
+		p3.unit_size = 18.0
 		p3.max_distance = 60.0
 		p3.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
 		add_child(p3)

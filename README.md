@@ -28,9 +28,10 @@ is generated in this repository. The full specification is in `PRD.md`.
 
 Desktop debug controls: **A/D** move, **S** down, **Space** jump (hold S +
 Space to drop through a one-way platform), **J** attack, **K** pick up,
-**L** throw, **Esc** menu/back, **F3** debug overlay (FPS, draw calls, ping,
+**L** throw, **mouse** aims, **Esc** menu/back, **F3** debug overlay (FPS, draw calls, ping,
 snapshot size). Mouse clicks emulate touches, so the on-screen joystick and
-buttons can be tried with the mouse.
+buttons can be tried with the mouse (on phones: drag from the Attack button
+to aim).
 
 ## Test multiplayer with several editor instances
 

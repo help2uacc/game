@@ -10,6 +10,7 @@ extends RefCounted
 const P_ALIVE := 1
 const P_FACING_RIGHT := 2
 const P_GROUNDED := 4
+const P_STUNNED := 8
 const PK_BLINK := 1
 const PK_FRESH := 2
 
@@ -29,6 +30,8 @@ static func pack(world: World, acks: Dictionary, tick: int, time_left: float) ->
 			flags |= P_FACING_RIGHT
 		if p.grounded:
 			flags |= P_GROUNDED
+		if p.stun_t > 0.0:
+			flags |= P_STUNNED
 		b.put_u8(flags)
 		b.put_float(p.global_position.x)
 		b.put_float(p.global_position.y)
@@ -98,6 +101,7 @@ static func unpack(data: PackedByteArray) -> Dictionary:
 			"alive": flags & P_ALIVE != 0,
 			"facing": 1 if flags & P_FACING_RIGHT != 0 else -1,
 			"grounded": flags & P_GROUNDED != 0,
+			"stunned": flags & P_STUNNED != 0,
 			"pos": pos,
 			"vel": vel,
 			"hp": b.get_u8(),

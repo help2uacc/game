@@ -16,7 +16,12 @@ func test_input_pack_roundtrip() -> void:
 	assert_near(o.move_x, -0.5, 0.01)
 	assert_eq([o.down, o.jump_pressed, o.jump_held, o.attack_held, o.pickup_pressed, o.throw_pressed],
 			[true, true, false, true, false, true])
-	assert_eq(i.pack().size(), 6, "6 bytes per input")
+	i.aim_x = 0.5
+	i.aim_y = -1.0
+	var o2: PlayerInput = PlayerInput.unpack(i.pack())
+	assert_near(o2.aim_x, 0.5, 0.01)
+	assert_near(o2.aim_y, -1.0, 0.01)
+	assert_eq(i.pack().size(), 8, "8 bytes per input (with aim)")
 
 
 func _md() -> MapData:

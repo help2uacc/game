@@ -18,6 +18,9 @@ const HEALTH_SCENE: PackedScene = preload("res://scenes/pickups/health_pack.tscn
 const ARMOR_SCENE: PackedScene = preload("res://scenes/pickups/armor.tscn")
 
 const MASK_WORLD := 1
+## One-way platforms are not solid for players but stop shots (layer 4).
+const MASK_PLATFORMS := 8
+const MASK_SHOTS := MASK_WORLD | MASK_PLATFORMS
 const MASK_PLAYERS := 2
 const MUZZLE_FORWARD := 0.6
 const MUZZLE_HEIGHT := 1.15
@@ -25,6 +28,12 @@ const THROW_UP_VELOCITY := 4.0  # TODO(PRD): "slight upward arc" has no value
 const GRENADE_RESTITUTION := 0.5
 const SPIKE_BOUNCE_VELOCITY := GameConfig.JUMP_VELOCITY  # TODO(PRD): spike bounce strength
 const PICKUP_GRAVITY := GameConfig.GRAVITY
+## v1.1: a spawn point glows this long before the pickup appears.
+const SPAWN_WARNING_TIME := 1.5
+## v1.1: two melee hits within this window disarm the victim and stun 1 s.
+const MELEE_COMBO_WINDOW := 3.0
+const MELEE_STUN_TIME := 1.0
+const GRENADE_THROW_SPEED := 15.0
 
 var authority: bool = true
 var map: GameMap
@@ -52,6 +61,8 @@ var _weapon_spawn_t: float = 0.0
 var _item_spawn_t: float = 0.0
 var _items_started: bool = false
 var _idle_input := PlayerInput.new()
+## Pickups announced with a glow and spawned after SPAWN_WARNING_TIME.
+var _pending_spawns: Array[Dictionary] = []
 
 # Client replication (§5.6): snapshot buffer rendered 100 ms in the past.
 var last_snapshot: Dictionary = {}
@@ -221,6 +232,7 @@ func _apply_discrete(s: Dictionary) -> void:
 		p.armor = int(d["armor"])
 		p.weapon_id = int(d["weapon"])
 		p.ammo = int(d["ammo"])
+		p.stun_t = 1.0 if bool(d["stunned"]) else 0.0
 		if pid == local_pid:
 			local_ack = int(d["ack"])
 	var crates: Array[bool] = s["crates"]
@@ -344,7 +356,9 @@ func _server_step(delta: float) -> void:
 			continue
 		var inp: PlayerInput = inputs[p.pid]
 		var edges: int = p.consume_edges(inp)
-		if frozen:
+		var stunned: bool = p.stun_t > 0.0
+		p.stun_t = maxf(0.0, p.stun_t - delta)
+		if frozen or stunned:
 			p.simulate_movement(_idle_input, false, delta, map)
 		else:
 			p.simulate_movement(inp, edges & Player.EDGE_JUMP != 0, delta, map)
@@ -352,8 +366,9 @@ func _server_step(delta: float) -> void:
 		if not p.alive:
 			continue
 		p.fire_cooldown = maxf(0.0, p.fire_cooldown - delta)
-		if frozen:
+		if frozen or stunned:
 			continue
+		_apply_aim(p, inp)
 		if edges & Player.EDGE_PICKUP != 0:
 			try_pickup_weapon(p)
 		if edges & Player.EDGE_THROW != 0:
@@ -363,6 +378,7 @@ func _server_step(delta: float) -> void:
 		_auto_pickup_items(p)
 	_step_projectiles(delta)
 	_step_pickups(delta)
+	_step_pending_spawns(delta)
 	if fighting and not frozen:
 		fight_time += delta
 		if spawning_enabled:
@@ -452,33 +468,26 @@ func _ray(from: Vector3, to: Vector3, mask: int, exclude: Array[RID]) -> Diction
 	return get_world_3d().direct_space_state.intersect_ray(q)
 
 
-## Line of sight against world geometry (blocks, crates, movers).
+## Line of sight for shots and splash: blocks, crates, movers and one-way
+## platforms all stop it (v1.1: no kills through floors or platforms).
 func has_line_of_sight(from: Vector3, to: Vector3) -> bool:
-	return _ray(from, to, MASK_WORLD, []).is_empty()
+	return _ray(from, to, MASK_SHOTS, []).is_empty()
 
 
-## Auto-aim target (§7.2): nearest living enemy within range with a clear
-## line of sight; on equal distance prefer one in the facing direction.
-func find_auto_aim_target(p: Player, weapon_range: float) -> Player:
-	var origin: Vector3 = p.global_position + Vector3(0, MUZZLE_HEIGHT, 0)
-	var best: Player = null
-	var best_d: float = INF
-	for o: Player in players.values():
-		if o == p or not o.alive:
-			continue
-		var d: float = origin.distance_to(o.chest())
-		if d > weapon_range:
-			continue
-		if not has_line_of_sight(origin, o.chest()):
-			continue
-		var in_front: bool = (o.global_position.x - p.global_position.x) * float(p.facing) >= 0.0
-		if d < best_d - 0.01:
-			best = o
-			best_d = d
-		elif absf(d - best_d) <= 0.01 and in_front:
-			best = o
-			best_d = d
-	return best
+## Manual aim (v1.1, replaces auto-aim): the input carries an aim vector;
+## without one the player shoots horizontally in the facing direction.
+func _apply_aim(p: Player, inp: PlayerInput) -> void:
+	if inp.has_aim():
+		var d: Vector3 = inp.aim_dir()
+		if absf(d.x) > 0.05:
+			p.facing = 1 if d.x > 0.0 else -1
+		p.aim_angle = atan2(d.y, absf(d.x))
+	else:
+		p.aim_angle = 0.0
+
+
+func aim_direction(p: Player) -> Vector3:
+	return Vector3(cos(p.aim_angle) * float(p.facing), sin(p.aim_angle), 0)
 
 
 ## Attack with the held weapon, or punch when unarmed.
@@ -501,13 +510,15 @@ func punch(p: Player) -> void:
 			continue
 		var dx: float = (o.global_position.x - p.global_position.x) * float(p.facing)
 		var dy: float = absf(o.chest().y - p.chest().y)
-		if dx >= -0.1 and dx <= reach and dy < 1.0 and dx < best_dx:
+		if dx >= -0.1 and dx <= reach and dy < 1.0 and dx < best_dx and has_line_of_sight(p.chest(), o.chest()):
 			best = o
 			best_dx = dx
 	var hit: bool = false
 	if best != null:
 		damage_player(best, w.damage, p.pid, GameConfig.Cause.PUNCH, Vector3(float(p.facing), 0, 0), w.knockback)
 		hit = true
+		if best.alive:
+			_melee_combo(best)
 	else:
 		for c: Crate in map.crates:
 			if not c.alive:
@@ -521,21 +532,34 @@ func punch(p: Player) -> void:
 	emit_event([GameEvents.PUNCH, p.pid, hit])
 
 
+## v1.1: the second melee hit within MELEE_COMBO_WINDOW disarms the victim
+## (the weapon drops as a pickup with its ammo) and stuns them for 1 s.
+func _melee_combo(victim: Player) -> void:
+	if sim_time - victim.last_melee_t <= MELEE_COMBO_WINDOW:
+		victim.melee_hits += 1
+	else:
+		victim.melee_hits = 1
+	victim.last_melee_t = sim_time
+	if victim.melee_hits < 2:
+		return
+	victim.melee_hits = 0
+	victim.stun_t = MELEE_STUN_TIME
+	if victim.weapon_id != 0:
+		var pk: PickupState = spawn_pickup(PickupState.Kind.WEAPON, victim.weapon_id, victim.ammo, victim.global_position + Vector3(0, 0.5, 0), false)
+		pk.vel_y = 4.0
+		victim.weapon_id = 0
+		victim.ammo = 0
+	emit_event([GameEvents.STUN, victim.pid])
+
+
 func fire_weapon(p: Player) -> void:
 	var w: WeaponData = WeaponDB.weapon(p.weapon_id)
 	if w == null:
 		return
 	p.fire_cooldown = w.cooldown()
 	var origin: Vector3 = p.global_position + Vector3(0, MUZZLE_HEIGHT, 0)
-	var target: Player = find_auto_aim_target(p, w.weapon_range)
-	var dir := Vector3(float(p.facing), 0, 0)
-	if target != null:
-		var dx: float = target.global_position.x - p.global_position.x
-		if absf(dx) > 0.01:
-			p.facing = 1 if dx > 0.0 else -1
-		dir = (target.chest() - origin).normalized()
-	p.aim_angle = atan2(dir.y, absf(dir.x))
-	var muzzle: Vector3 = muzzle_origin(p)
+	var dir: Vector3 = aim_direction(p)
+	var muzzle: Vector3 = origin + dir * MUZZLE_FORWARD
 	match w.kind:
 		WeaponData.Kind.HITSCAN:
 			_fire_hitscan(p, w, origin, muzzle, dir)
@@ -543,11 +567,8 @@ func fire_weapon(p: Player) -> void:
 			spawn_projectile(ProjectileState.Type.ROCKET, p.pid, muzzle, dir * w.projectile_speed, w.id, 0)
 			emit_event([GameEvents.SHOT, p.pid, w.id, muzzle, PackedVector3Array()])
 		WeaponData.Kind.THROWN_PROJECTILE:
-			var vel: Vector3
-			if target != null:
-				vel = ballistic_velocity(muzzle, target.global_position + Vector3(0, 0.3, 0), GameConfig.GRAVITY)
-			else:
-				vel = Vector3(10.0 * float(p.facing), 8.0, 0)  # TODO(PRD): grenade throw without target
+			# Thrown along the aim with a small lift; no aim = forward arc.
+			var vel: Vector3 = dir * GRENADE_THROW_SPEED + Vector3(0, 3.0, 0)  # TODO(PRD): grenade throw speed
 			spawn_projectile(ProjectileState.Type.GRENADE, p.pid, muzzle, vel, w.id, 0)
 			emit_event([GameEvents.SHOT, p.pid, w.id, muzzle, PackedVector3Array()])
 	p.ammo -= 1
@@ -567,7 +588,7 @@ func _fire_hitscan(p: Player, w: WeaponData, origin: Vector3, muzzle: Vector3, d
 		var angle: float = deg_to_rad(rng.randf_range(-w.spread_deg * 0.5, w.spread_deg * 0.5))
 		var d: Vector3 = dir.rotated(Vector3(0, 0, 1), angle)
 		var to: Vector3 = origin + d * w.weapon_range
-		var hit: Dictionary = _ray(origin, to, MASK_WORLD | MASK_PLAYERS, exclude)
+		var hit: Dictionary = _ray(origin, to, MASK_SHOTS | MASK_PLAYERS, exclude)
 		if hit.is_empty():
 			ends.append(to)
 			continue
@@ -586,6 +607,15 @@ func _fire_hitscan(p: Player, w: WeaponData, origin: Vector3, muzzle: Vector3, d
 		elif col is Crate:
 			damage_crate(col as Crate, w.damage)
 	emit_event([GameEvents.SHOT, p.pid, w.id, muzzle, ends])
+
+
+## Splash only hurts players with a clear line from the explosion to their
+## feet, chest or head (v1.1: no damage through floors or platforms).
+func _splash_reaches(pos: Vector3, o: Player) -> bool:
+	for h: float in [0.25, GameConfig.CHEST_HEIGHT, 1.6]:
+		if has_line_of_sight(pos, o.global_position + Vector3(0, h, 0)):
+			return true
+	return false
 
 
 ## Initial velocity for an arc from `from` to `to` under gravity `g`
@@ -611,7 +641,7 @@ func explode(pos: Vector3, owner_pid: int, w: WeaponData, direct_victim: Player)
 		var dmg: int = 0
 		if o == direct_victim:
 			dmg = w.damage
-		elif dist <= w.splash_radius:
+		elif dist <= w.splash_radius and _splash_reaches(pos, o):
 			dmg = Rules.falloff_damage(dist, w.splash_radius, float(w.damage), float(w.splash_edge_damage))
 		if dmg <= 0:
 			continue
@@ -709,11 +739,12 @@ func _owner_exclude(pr: ProjectileState) -> Array[RID]:
 func _step_rocket(pr: ProjectileState, delta: float) -> void:
 	var w: WeaponData = WeaponDB.weapon(GameConfig.WeaponId.ROCKET)
 	var next: Vector3 = pr.pos + pr.vel * delta
-	var hit: Dictionary = _ray(pr.pos, next, MASK_WORLD | MASK_PLAYERS, _owner_exclude(pr))
+	var hit: Dictionary = _ray(pr.pos, next, MASK_SHOTS | MASK_PLAYERS, _owner_exclude(pr))
 	if not hit.is_empty():
 		var col: Object = hit["collider"]
 		var direct: Player = col as Player
-		var hp: Vector3 = hit["position"]
+		# Explode just in front of the surface so splash LOS starts outside it.
+		var hp: Vector3 = (hit["position"] as Vector3) - pr.vel.normalized() * 0.15
 		remove_projectile(pr)
 		explode(hp, pr.owner, w, direct)
 		return
@@ -727,7 +758,7 @@ func _step_grenade(pr: ProjectileState, delta: float) -> void:
 	var w: WeaponData = WeaponDB.weapon(GameConfig.WeaponId.GRENADE)
 	pr.vel.y = maxf(pr.vel.y - GameConfig.GRAVITY * delta, -GameConfig.MAX_FALL_SPEED)
 	var next: Vector3 = pr.pos + pr.vel * delta
-	var hit: Dictionary = _ray(pr.pos, next, MASK_WORLD, [])
+	var hit: Dictionary = _ray(pr.pos, next, MASK_SHOTS, [])
 	if not hit.is_empty():
 		var n: Vector3 = hit["normal"]
 		pr.pos = (hit["position"] as Vector3) + n * 0.12
@@ -746,7 +777,7 @@ func _step_grenade(pr: ProjectileState, delta: float) -> void:
 func _step_thrown(pr: ProjectileState, delta: float) -> void:
 	pr.vel.y = maxf(pr.vel.y - GameConfig.GRAVITY * delta, -GameConfig.MAX_FALL_SPEED)
 	var next: Vector3 = pr.pos + pr.vel * delta
-	var hit: Dictionary = _ray(pr.pos, next, MASK_WORLD | MASK_PLAYERS, _owner_exclude(pr))
+	var hit: Dictionary = _ray(pr.pos, next, MASK_SHOTS | MASK_PLAYERS, _owner_exclude(pr))
 	if hit.is_empty():
 		pr.pos = next
 		return
@@ -919,12 +950,41 @@ func item_pickup_count() -> int:
 	return pickups.size() - weapon_pickup_count()
 
 
-## A spawn point is free if no pickup is within 1.5 m (§7.5).
+## A spawn point is free if no pickup (or announced spawn) is within 1.5 m (§7.5).
 func is_point_free(point: Vector3) -> bool:
 	for pk: PickupState in pickups.values():
 		if pk.pos.distance_to(point) < GameConfig.PICKUP_FREE_RADIUS:
 			return false
+	for ps: Dictionary in _pending_spawns:
+		if (ps["pos"] as Vector3).distance_to(point) < GameConfig.PICKUP_FREE_RADIUS:
+			return false
 	return true
+
+
+## v1.1: announce a spawn with a glow, spawn it SPAWN_WARNING_TIME later.
+func _announce_spawn(kind: int, weapon_id: int, ammo: int, pos: Vector3) -> void:
+	_pending_spawns.append({"kind": kind, "weapon": weapon_id, "ammo": ammo, "pos": pos, "t": SPAWN_WARNING_TIME})
+	emit_event([GameEvents.SPAWN_WARN, pos, kind])
+
+
+func _step_pending_spawns(delta: float) -> void:
+	var i: int = 0
+	while i < _pending_spawns.size():
+		var ps: Dictionary = _pending_spawns[i]
+		ps["t"] = float(ps["t"]) - delta
+		if float(ps["t"]) <= 0.0:
+			_pending_spawns.remove_at(i)
+			spawn_pickup(int(ps["kind"]), int(ps["weapon"]), int(ps["ammo"]), ps["pos"], true)
+		else:
+			i += 1
+
+
+func pending_count(weapons: bool) -> int:
+	var n: int = 0
+	for ps: Dictionary in _pending_spawns:
+		if (int(ps["kind"]) == PickupState.Kind.WEAPON) == weapons:
+			n += 1
+	return n
 
 
 func _random_free_point(points: Array[Vector3]) -> Variant:
@@ -942,7 +1002,7 @@ func spawn_random_weapon() -> bool:
 	if pt == null:
 		return false
 	var wid: int = int(Rules.weighted_pick(WeaponDB.weapon_weights(), rng))
-	spawn_pickup(PickupState.Kind.WEAPON, wid, WeaponDB.weapon(wid).ammo, pt, true)
+	_announce_spawn(PickupState.Kind.WEAPON, wid, WeaponDB.weapon(wid).ammo, pt)
 	return true
 
 
@@ -952,7 +1012,7 @@ func spawn_random_item() -> bool:
 		return false
 	var iid: int = int(Rules.weighted_pick(WeaponDB.item_weights(), rng))
 	var kind: int = PickupState.Kind.HEALTH if iid == GameConfig.ItemId.HEALTH else PickupState.Kind.ARMOR
-	spawn_pickup(kind, 0, 0, pt, true)
+	_announce_spawn(kind, 0, 0, pt)
 	return true
 
 
@@ -975,14 +1035,14 @@ func _step_spawning(delta: float) -> void:
 	_weapon_spawn_t += delta
 	if _weapon_spawn_t >= GameConfig.WEAPON_SPAWN_INTERVAL:
 		_weapon_spawn_t -= GameConfig.WEAPON_SPAWN_INTERVAL
-		if weapon_pickup_count() < GameConfig.MAX_GROUND_WEAPONS:
+		if weapon_pickup_count() + pending_count(true) < GameConfig.MAX_GROUND_WEAPONS:
 			spawn_random_weapon()
 	_item_spawn_t += delta
 	var interval: float = GameConfig.ITEM_SPAWN_INTERVAL if _items_started else GameConfig.FIRST_ITEM_TIME
 	if _item_spawn_t >= interval:
 		_item_spawn_t -= interval
 		_items_started = true
-		if item_pickup_count() < GameConfig.MAX_GROUND_ITEMS:
+		if item_pickup_count() + pending_count(false) < GameConfig.MAX_GROUND_ITEMS:
 			spawn_random_item()
 
 
@@ -1059,6 +1119,15 @@ func apply_event(ev: Array) -> void:
 		GameEvents.THROWN_HIT:
 			effects.burst(ev[1], Palette.WHITE, 8, 3.0, 0.8, 0.3)
 			AudioManager.play_at("thrown_hit", ev[1])
+		GameEvents.SPAWN_WARN:
+			effects.spawn_glow(ev[1], SPAWN_WARNING_TIME, int(ev[2]) == PickupState.Kind.WEAPON)
+			AudioManager.play_at("spawn_warn", ev[1], 1.0, -4.0)
+		GameEvents.STUN:
+			var sp2: Player = get_player(int(ev[1]))
+			if sp2 != null:
+				sp2.stun_t = MELEE_STUN_TIME
+				effects.burst(sp2.chest() + Vector3(0, 0.6, 0), Palette.GOLD, 10, 3.0, 0.7, 0.5, -2.0)
+				AudioManager.play_at("weapon_empty", sp2.chest(), 0.7)
 		GameEvents.DESPAWN:
 			effects.burst(ev[2] as Vector3 + Vector3(0, 0.45, 0), Color("#D8D4E4"), 8, 2.5, 0.7, 0.4, -3.0)
 

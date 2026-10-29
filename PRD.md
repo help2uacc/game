@@ -1,6 +1,6 @@
 # PRD — Block Brawl
 
-> **Status:** v1.0 — ready for implementation
+> **Status:** v1.1 — owner change requests applied (see §19)
 > **Owner:** Joe
 > **Implementer:** Claude Code (cloud), working against the project GitHub repository
 > **Platform:** Android only · Landscape · Local network multiplayer (Wi-Fi / Hotspot)
@@ -29,7 +29,7 @@ A match is a series of **rounds** (default **12**, host can set **4–99**). Eve
 1. Friends in the same room can start a match in under 30 seconds.
 2. Stable **60 FPS** on a mid-range Android phone with 8 players.
 3. Clean, minimal, cute look; every asset is made by Claude (no third-party art, no external asset downloads).
-4. Simple touch controls: one joystick + a few buttons, auto-aim.
+4. Simple touch controls: one joystick + a few buttons, manual aim (drag from the Attack button).
 
 ### 1.2 Non-goals
 - No internet play, no accounts, no servers, no ads, no in-app purchases, no analytics, no stored statistics.
@@ -164,7 +164,7 @@ Packets are UTF-8 JSON:
 - **Not enough players:** if, during a match, fewer than 2 players are connected (ignoring players inside their reconnect window), the server waits until all reconnect windows expire; if still < 2 connected, the match ends early and goes to Match Results.
 
 ### 5.6 Replication model
-- **Inputs (client → host):** sent every physics frame (60 Hz), `unreliable_ordered` RPC, packed: `seq:int, move_x:float(-1..1), down:bool, jump_pressed:bool, jump_held:bool, attack_held:bool, pickup_pressed:bool, throw_pressed:bool`. Edge-triggered flags ("pressed") are latched until acknowledged in the next snapshot to avoid loss.
+- **Inputs (client → host):** sent every physics frame (60 Hz), `unreliable_ordered` RPC, packed: `seq:int, move_x:float(-1..1), down:bool, jump_pressed:bool, jump_held:bool, attack_held:bool, pickup_pressed:bool, throw_pressed:bool, aim_x:float(-1..1), aim_y:float(-1..1)` (aim added in v1.1). Edge-triggered flags ("pressed") are latched until acknowledged in the next snapshot to avoid loss.
 - **State (host → clients):** snapshots at **30 Hz** via `MultiplayerSynchronizer` (replication interval 1/30 s) or an equivalent packed RPC. Contains per player: position, velocity, facing, HP, armor, weapon id, ammo, animation state, alive flag; plus projectiles, pickups, moving platforms and crates.
 - **Events (host → clients):** `reliable` RPCs for discrete events: shot fired (origin, end point, weapon id → tracer/VFX/SFX), hit, kill (killer, victim, cause → kill feed), pickup spawned/removed, crate destroyed, explosion, round state changes, scoreboard updates.
 - **Spawning:** `MultiplayerSpawner` (server authority) for players, pickups, projectiles.
@@ -206,7 +206,7 @@ A **blocky stickman**, cute and chunky, built only from boxes:
 - Only colour customisation; no hats/skins.
 
 ### 6.3 Animations (procedural / `AnimationPlayer` on box transforms, no skeleton)
-`idle` (gentle bob), `run` (leg/arm swing), `jump`, `double_jump` (quick front flip of the whole body), `fall`, `land` (squash), `punch`, `shoot` (arm recoil, per weapon strength), `hold_weapon` (arm pose overlay), `throw`, `hit` (short flinch + white flash 0.08 s), `death` (character topples backwards, bounces once, fades out over 0.6 s and pops into small cube particles in the player colour).
+All poses blend smoothly (v1.1): limbs ease toward their target pose, facing changes with a short 0.12 s squash-turn, the weapon follows the aim smoothly and kicks back along its barrel when firing, take-off has a small stretch. `idle` (gentle bob), `run` (leg/arm swing), `jump`, `double_jump` (quick front flip of the whole body), `fall`, `land` (squash), `punch`, `shoot` (arm recoil, per weapon strength), `hold_weapon` (arm pose overlay), `throw`, `hit` (short flinch + white flash 0.08 s), `death` (character topples backwards, bounces once, fades out over 0.6 s and pops into small cube particles in the player colour).
 
 ### 6.4 Stats & movement
 | Parameter | Value |
@@ -246,20 +246,19 @@ A **blocky stickman**, cute and chunky, built only from boxes:
 - **Unarmed:** the Attack button performs a **punch**.
 - **Auto-fire:** holding Attack fires repeatedly at the weapon's fire rate.
 - Weapons lying on the ground **despawn after 30 s** if not picked up (blink during the last 3 s).
+- **Melee combo (v1.1):** a player hit by **2 punches within 3 s** is **disarmed** (the held weapon drops as a pickup with its ammo) and **stunned for 1 s** (no movement, jumping, attacking, picking up or throwing; gravity and knockback still apply). The counter resets after the stun.
+- **Cover (v1.1):** shots, rockets, grenades, thrown weapons and explosion splash are stopped by solid blocks, crates, moving platforms **and one-way platforms**; splash only damages a player with a clear line from the explosion to their feet, chest or head. Nobody can be hit through a floor or platform.
 - **Friendly fire:** not applicable (free-for-all).
 
-### 7.2 Auto-aim
-When Attack is pressed with a ranged weapon or grenade:
-1. Candidate targets = living enemies within the weapon's **range** with a clear **line of sight** (raycast from the weapon muzzle to the target's chest against world geometry).
-2. Choose the **nearest** candidate; on equal distance prefer one in the facing direction.
-3. If a target exists: the character turns to face it and fires toward its chest (spread still applies).
-4. If none: fire **horizontally in the facing direction**.
-- The aim is computed **on the server** at fire time.
-- For the **local player only**, a small target marker (pulsing corner brackets in the player's colour) is drawn around the currently auto-aimed enemy (client computes the same rule locally for display only).
-- Punch is not auto-aimed; it hits in the facing direction.
+### 7.2 Aiming (v1.1: manual, replaces auto-aim)
+- The player aims manually. Touch: press **Attack** to fire and **drag from the Attack button** to aim in that direction (drag radius 150 px, small dead zone); releasing stops firing and aiming. Desktop: the **mouse pointer** aims (relative to the player), J fires.
+- The input carries the aim vector; the **server** fires along it (spread still applies). Without an aim vector the weapon fires **horizontally in the facing direction**. Aiming left/right turns the character.
+- Grenades are thrown along the aim direction at 15 m/s with a small upward lift (3 m/s).
+- For the local player a short dotted **aim line** in the player's colour is drawn from the weapon.
+- Punch is not aimed; it hits in the facing direction.
 
 ### 7.3 Weapons
-Six weapons. Hitscan weapons use a server raycast; clients draw a short-lived tracer line (0.06 s) and muzzle flash.
+Six weapons. Hitscan weapons use a server raycast; clients draw a tracer line that fades out over 0.12 s (v1.1) and a muzzle flash.
 
 | Weapon | Type | Damage | Fire rate | Ammo | Range | Spread | Knockback | Notes |
 |---|---|---|---|---|---|---|---|---|
@@ -267,8 +266,8 @@ Six weapons. Hitscan weapons use a server raycast; clients draw a short-lived tr
 | SMG | Hitscan | 9 | 10 /s | 40 | 18 m | 6° | 1 | — |
 | Shotgun | Hitscan ×6 pellets | 9 per pellet | 1.2 /s | 6 | 10 m | 15° cone | 8 (total, if ≥1 pellet hits) | — |
 | Sniper | Hitscan | 70 | 0.8 /s | 4 | 60 m | 0° | 10 | Piercing: no (stops at first hit) |
-| Rocket Launcher | Projectile | 60 direct; splash 3.0 m radius, 60→20 linear falloff | 0.7 /s | 3 | 40 m (auto-aim) | 0° | 14 | Rocket speed 18 m/s, no gravity, explodes on contact or after 3 s. Self-damage 50 %. Destroys crates. |
-| Grenades | Thrown projectile | 70 at centre, 3.5 m radius, linear falloff to 15 | 1 /s | 3 | 16 m (auto-aim) | — | 12 | Arc throw computed to land near target; bounces; 2.0 s fuse. Self-damage 50 %. Destroys crates. |
+| Rocket Launcher | Projectile | 60 direct; splash 3.0 m radius, 60→20 linear falloff | 0.7 /s | 3 | 40 m | 0° | 14 | Rocket speed 18 m/s, no gravity, explodes on contact or after 3 s. Self-damage 50 %. Destroys crates. |
+| Grenades | Thrown projectile | 70 at centre, 3.5 m radius, linear falloff to 15 | 1 /s | 3 | 16 m | — | 12 | Thrown along the aim (§7.2); bounces; 2.0 s fuse. Self-damage 50 %. Destroys crates. |
 | *(Punch)* | Melee | 12 | cooldown 0.45 s | ∞ | 1.2 m | — | 5 | Unarmed only |
 
 Weapon spawn weights: Pistol 25, SMG 20, Shotgun 20, Grenades 15, Sniper 12, Rocket Launcher 8.
@@ -290,6 +289,7 @@ Weapon data lives in `WeaponData` resources (`res://data/weapons/*.tres`) so val
 - **At round start (end of countdown):** 3 weapons spawn at random free weapon points.
 - **Then:** every **8 s** one weapon spawns at a random free weapon point, if fewer than **6** weapons are on the ground.
 - **Items:** first item at **30 s**, then every **20 s**, if fewer than **2** items are on the ground.
+- **Spawn telegraph (v1.1):** every weapon and item spawn is announced **1.5 s in advance** by a pulsing glow column with rising sparkles at its spawn point (gold for weapons, pink for items) and a soft shimmer SFX (`spawn_warn`); an announced point counts as occupied and announced spawns count toward the 6-weapon / 2-item caps.
 - A pickup spawns with a short "pop" animation (scale 0 → 1.15 → 1.0, 0.25 s) and spawn SFX. Pickups bob and slowly rotate. A pickup point is "free" if no pickup is within 1.5 m.
 
 ---
@@ -301,11 +301,11 @@ Minimal, fixed layout, clean and semi-transparent (not customisable in v1, but j
 | Control | Position | Behaviour |
 |---|---|---|
 | **Joystick** | Left half of the screen, **floating**: appears where the thumb touches. Radius 110 px (design res). | Horizontal axis → move. Pushing down (y > 0.6) + Jump → drop through one-way platform. |
-| **Attack** | Right side, largest button (160 px) | Shoot (held = auto-fire) / punch when unarmed. Icon changes to the current weapon. |
-| **Jump** | Right side, below-right of Attack (130 px) | Jump / double jump. |
-| **Pick Up** | Right side, above Attack (100 px) | **Visible only** when overlapping a weapon pickup. |
-| **Throw** | Right side, left of Attack (100 px) | **Visible only** when holding a weapon. |
-| **Menu** (☰) | Top-left small button | Opens in-match overlay: Resume, Settings, Leave (confirm). The game is **not paused** (multiplayer). |
+| **Attack** | Right side, largest button (230 px, v1.1) | Shoot (held = auto-fire) / punch when unarmed; drag from it to aim (§7.2). Icon changes to the current weapon. |
+| **Jump** | Right side, bottom-right corner (190 px, v1.1) | Jump / double jump. |
+| **Pick Up** | Right side, above Attack (170 px, v1.1) | **Visible only** when overlapping a weapon pickup. |
+| **Throw** | Right side, left of Attack (150 px, v1.1) | **Visible only** when holding a weapon. |
+| **Menu** (☰) | Top-left button (120 px, v1.1) | Opens in-match overlay: Resume, Settings, Leave (confirm). The game is **not paused** (multiplayer). |
 | **Spectate ◀ ▶** | Bottom centre, visible only when spectating | Cycle followed player. |
 
 - Multi-touch: joystick and buttons must work simultaneously.
@@ -438,7 +438,7 @@ Maps are **JSON files** in `res://data/maps/` built at runtime into a `GridMap` 
 | `W` | weapon spawn point (empty cell) |
 | `I` | item spawn point (empty cell) |
 
-- **Map size:** larger than one screen — **70–100 cells wide**, **30–45 cells tall**. Camera shows about 24 m horizontally.
+- **Map size:** larger than one screen — **70–100 cells wide**, **30–45 cells tall**. Camera shows about 29 m horizontally (v1.1).
 - Every map: ≥ 8 `S`, ≥ 10 `W`, ≥ 3 `I`, roughly **mirror-symmetric** left/right for fairness, at least two vertical levels, and open pits/edges to fall off.
 - `tools/validate_maps.py` (and a GDScript test) must verify: consistent row length, size limits, legend characters only, spawn counts, every `S` has floor within 6 cells below, movers reference `M` cells.
 
@@ -467,7 +467,7 @@ Each map has its own pastel theme (primary/secondary block colours + background 
 - No real-time lights or shadow maps (see §11.2).
 
 ### 10.4 Camera
-- `Camera3D`, **perspective**, FOV 40°, positioned at Z = +30 m looking at the player with a slight downward tilt (−6°), so cube sides and depth are visible.
+- `Camera3D`, **perspective**, FOV 40°, positioned at Z = +40 m (v1.1, zoomed out; ~29 m visible horizontally) looking at the player with a slight downward tilt (−6°), so cube sides and depth are visible.
 - Follows **only the local player** (or the spectated player). Smooth follow (lerp factor 8/s), horizontal look-ahead 2 m in the movement direction, small vertical dead-zone (1 m).
 - Clamped to map bounds (with 2 m margin) so the camera never shows far outside the map.
 - Small screen shake on explosions (amplitude 0.3 m, 0.25 s) and sniper/rocket fire (0.1 m) — on the local camera, scaled by distance.
@@ -573,7 +573,7 @@ Standard Godot conventions (official GDScript style guide):
     match_manager.gd            # server-side round/match flow, spawning, scoring
     scene_router.gd             # screen transitions
   resources/ weapon_data.gd, item_data.gd, map_theme.gd
-  gameplay/ ...                 # player controller, combat, auto-aim, hazards, map_builder
+  gameplay/ ...                 # player controller, combat, aiming, hazards, map_builder
   ui/ ...
 /tools/
   gen_sfx.py  gen_music.py  gen_branding.py  validate_maps.py
@@ -617,7 +617,7 @@ Claude downloads the matching **Godot 4.7.x headless/Linux editor binary from th
 5. Host leaving returns all clients to the main menu with a message.
 6. Each round uses a different map; 12 distinct maps exist and validate.
 7. Round ends at ≤1 alive or 300 s; round winner and DRAW are shown correctly; match winner by total kills with DRAW support.
-8. All 6 weapons, punch, throw, pickup button, drop-on-swap, ammo removal, 30 s despawn, health and armor items behave as specified; auto-aim follows §7.2.
+8. All 6 weapons, punch, throw, pickup button, drop-on-swap, ammo removal, 30 s despawn, health and armor items behave as specified; aiming follows §7.2; melee combo and cover per §7.1.
 9. Falling off the map, lava, spikes, crates, jump pads and moving platforms work; environmental kill credit follows §4.3.
 10. Double jump, one-way platform drop-through, knockback work as specified.
 11. Dead players can spectate and cycle living players.
@@ -664,3 +664,13 @@ The owner explicitly delegated these decisions; they are the defaults above, col
 ## 18. Out of scope (v1)
 
 Internet play, host migration, bots, chat/emotes, accounts, stored stats/leaderboards, ads, IAP, analytics, iOS/desktop builds, cosmetics beyond colour, control layout customisation, client-side prediction, localisation other than English.
+
+## 19. Change requests v1.1 (owner)
+
+1. **Manual aiming** instead of auto-aim (§7.2, §8, §5.6 input packet).
+2. **Zoomed-out camera**: Z = +40 m (§10.4).
+3. **Spawn telegraph**: weapons/items glow 1.5 s before spawning (§7.5).
+4. **Bigger buttons**: Attack 230, Jump 190, Pick Up 170, Throw 150, Menu 120 px (§8).
+5. **No hits through cover**: shots, projectiles and splash are blocked by floors, blocks, crates, movers and one-way platforms (§7.1).
+6. **Melee combo**: 2 punches within 3 s disarm the victim and stun them for 1 s (§7.1).
+7. **Smoother animation, movement and shooting**: blended poses, eased turning, smoothed weapon aim with recoil kick, fading tracers (§6.3, §7.3).

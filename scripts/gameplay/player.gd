@@ -32,6 +32,10 @@ var coyote_t: float = 0.0
 var jump_buffer_t: float = 0.0
 var drop_t: float = 0.0
 var invuln_t: float = 0.0
+## Stunned (no control) after the second melee hit in a row (v1.1).
+var stun_t: float = 0.0
+var melee_hits: int = 0
+var last_melee_t: float = -100.0
 var fire_cooldown: float = 0.0
 var double_jump_ready: bool = true
 var last_input: PlayerInput = PlayerInput.new()
@@ -96,6 +100,9 @@ func reset_for_round(pos: Vector3) -> void:
 	jump_buffer_t = 0.0
 	drop_t = 0.0
 	invuln_t = 0.0
+	stun_t = 0.0
+	melee_hits = 0
+	last_melee_t = -100.0
 	fire_cooldown = 0.0
 	double_jump_ready = true
 	visible = true
@@ -215,6 +222,7 @@ func update_visuals(delta: float) -> void:
 	stickman.set_aim(aim_angle)
 	stickman.set_weapon(weapon_id)
 	stickman.set_motion(grounded, Vector2(velocity.x, velocity.y))
+	stickman.set_stunned(stun_t > 0.0)
 	# Footsteps while running on the ground.
 	if grounded and absf(velocity.x) > 1.0:
 		_step_t -= delta

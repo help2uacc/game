@@ -13,6 +13,8 @@ const BAR_W := 420.0
 const BAR_H := 34.0
 
 var world: World = null
+## Local player's current aim input (v1.1 manual aim), set by GameScreen.
+var local_aim: Vector2 = Vector2.ZERO
 var sandbox: bool = false
 
 var _top_left: Control
@@ -107,12 +109,12 @@ func _hud_label(text: String, font_size: int = 34) -> Label:
 
 func _build_top_left() -> void:
 	_top_left = _corner(Control.PRESET_TOP_LEFT)
-	_menu_btn = UiKit.icon_button("menu", func() -> void: menu_pressed.emit(), 96)
+	_menu_btn = UiKit.icon_button("menu", func() -> void: menu_pressed.emit(), 120)
 	_menu_btn.position = Vector2(24, 24)
 	_menu_btn.modulate = Color(1, 1, 1, 0.85)
 	_top_left.add_child(_menu_btn)
 	var weapon_row: HBoxContainer = UiKit.hbox(12)
-	weapon_row.position = Vector2(140, 84)
+	weapon_row.position = Vector2(164, 84)
 	weapon_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_weapon_icon = TextureRect.new()
 	_weapon_icon.custom_minimum_size = Vector2(64, 64)
@@ -184,14 +186,14 @@ func _build_spectate_bar() -> void:
 	_bottom_center = bottom
 	_spectate_bar = UiKit.hbox(24)
 	_spectate_bar.alignment = BoxContainer.ALIGNMENT_CENTER
-	_spectate_bar.position = Vector2(-450, -150)
+	_spectate_bar.position = Vector2(-470, -180)
 	_spectate_bar.custom_minimum_size = Vector2(900, 120)
-	_spectate_bar.add_child(UiKit.icon_button("arrow_left", func() -> void: spectate_cycle.emit(-1), 110))
+	_spectate_bar.add_child(UiKit.icon_button("arrow_left", func() -> void: spectate_cycle.emit(-1), 140))
 	_spectate_label = _hud_label("SPECTATING", 40)
 	_spectate_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_spectate_label.custom_minimum_size = Vector2(560, 0)
 	_spectate_bar.add_child(_spectate_label)
-	_spectate_bar.add_child(UiKit.icon_button("arrow_right", func() -> void: spectate_cycle.emit(1), 110))
+	_spectate_bar.add_child(UiKit.icon_button("arrow_right", func() -> void: spectate_cycle.emit(1), 140))
 	_spectate_bar.visible = false
 	bottom.add_child(_spectate_bar)
 
@@ -405,7 +407,7 @@ func _draw() -> void:
 	var lp: Player = world.local_player()
 	var s: float = Settings.hud_scale
 	if lp != null and Settings.hud_enabled("health"):
-		_draw_bars(lp, _top_left.position + Vector2(140, 34) * s, s)
+		_draw_bars(lp, _top_left.position + Vector2(164, 34) * s, s)
 	if lp != null and lp.alive:
 		_draw_target_marker(lp)
 	if Settings.hud_enabled("offscreen"):
@@ -435,33 +437,25 @@ func _draw_bars(lp: Player, pos: Vector2, s: float) -> void:
 	draw_string(font, pos + Vector2(12, h - 7), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, int(26 * s), Palette.WHITE)
 
 
-## Pulsing corner brackets around the enemy the local player auto-aims at.
+## v1.1 manual aim: a dotted aim line from the local player's weapon.
 func _draw_target_marker(lp: Player) -> void:
 	if lp.weapon_id == 0:
 		return
-	var w: WeaponData = WeaponDB.weapon(lp.weapon_id)
-	var target: Player = world.find_auto_aim_target(lp, w.weapon_range)
-	if target == null:
-		return
+	var dir := Vector3(float(lp.facing), 0, 0)
+	if local_aim.length() > 0.2:
+		dir = Vector3(local_aim.x, local_aim.y, 0).normalized()
 	var cam: CameraRig = world.camera
-	if cam.is_position_behind(target.center()):
-		return
-	var top: Vector2 = cam.unproject_position(target.global_position + Vector3(0, 1.9, 0))
-	var bot: Vector2 = cam.unproject_position(target.global_position)
-	var hgt: float = absf(bot.y - top.y)
-	var center: Vector2 = (top + bot) * 0.5
-	var pulse: float = 1.0 + 0.12 * sin(_marker_t * 8.0)
-	var half := Vector2(hgt * 0.42, hgt * 0.62) * pulse
+	var origin: Vector3 = lp.global_position + Vector3(0, World.MUZZLE_HEIGHT, 0) + dir * 0.7
 	var col: Color = Palette.player_color(lp.color_id)
-	var l: float = hgt * 0.22
-	var t: float = 6.0
-	for sx: float in [-1.0, 1.0]:
-		for sy: float in [-1.0, 1.0]:
-			var c: Vector2 = center + Vector2(half.x * sx, half.y * sy)
-			draw_line(c, c + Vector2(-sx * l, 0), Palette.INK, t + 4.0)
-			draw_line(c, c + Vector2(0, -sy * l), Palette.INK, t + 4.0)
-			draw_line(c, c + Vector2(-sx * l, 0), col, t)
-			draw_line(c, c + Vector2(0, -sy * l), col, t)
+	var pulse: float = 0.75 + 0.25 * sin(_marker_t * 6.0)
+	for i: int in range(7):
+		var a3: Vector3 = origin + dir * (float(i) * 0.8)
+		var b3: Vector3 = a3 + dir * 0.4
+		var a2: Vector2 = cam.unproject_position(a3)
+		var b2: Vector2 = cam.unproject_position(b3)
+		var fade: float = (1.0 - float(i) / 7.0) * pulse
+		draw_line(a2, b2, Color(Palette.INK, 0.5 * fade), 9.0)
+		draw_line(a2, b2, Color(col, fade), 5.0)
 
 
 ## Small coloured arrows at the screen edge pointing at off-screen enemies.

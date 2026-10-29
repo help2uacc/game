@@ -87,7 +87,7 @@ const SPAWN_FLOOR_MAX_DROP := 6
 
 # --- Camera (§10.4) ---
 const CAMERA_FOV := 40.0
-const CAMERA_DISTANCE := 30.0
+const CAMERA_DISTANCE := 40.0  # v1.1: zoomed out (was 30 m)
 const CAMERA_TILT_DEG := -6.0
 const CAMERA_LERP := 8.0
 const CAMERA_LOOK_AHEAD := 2.0

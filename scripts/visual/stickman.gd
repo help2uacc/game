@@ -68,6 +68,24 @@ var _flashing: bool = false
 var _pending_name: String = ""
 var _pending_local: bool = false
 var _pending_weapon: int = 0
+# v1.1 smoothing state.
+const TURN_TIME := 0.12
+const LIMB_RATE := 18.0
+const AIM_RATE := 22.0
+var _face_blend: float = 1.0
+var _turn_ready: bool = false
+var _s_arm_f: float = 0.15
+var _s_arm_b: float = -0.15
+var _s_leg_f: float = 0.0
+var _s_leg_b: float = 0.0
+var _s_lean: float = 0.0
+var _s_bob: float = 0.0
+var _aim_smooth: float = 0.0
+var _kick: float = 0.0
+var _stretch: float = 0.0
+var _was_airborne: bool = false
+var _stunned: bool = false
+var _stars: Node3D = null
 
 
 func _ready() -> void:
@@ -119,11 +137,20 @@ func set_facing(dir: int) -> void:
 	facing = 1 if dir >= 0 else -1
 	if _body == null:
 		return
-	# Mirror instead of turning so the front arm (weapon hand) always faces the camera.
-	if facing > 0:
-		_body.basis = Basis(Vector3.UP, BODY_YAW)
-	else:
-		_body.basis = Basis(Vector3.UP, -BODY_YAW) * Basis.from_scale(Vector3(-1.0, 1.0, 1.0))
+	if not is_inside_tree() or not _turn_ready:
+		_face_blend = float(facing)
+		_turn_ready = true
+		_apply_facing()
+
+
+## Mirror instead of turning so the front arm (weapon hand) always faces the
+## camera. v1.1: the mirror is eased over TURN_TIME (squash-turn) instead of
+## snapping.
+func _apply_facing() -> void:
+	var s: float = _face_blend
+	var sgn: float = 1.0 if s >= 0.0 else -1.0
+	var w: float = maxf(absf(s), 0.06) * sgn
+	_body.basis = Basis(Vector3.UP, BODY_YAW * sgn) * Basis.from_scale(Vector3(w, 1.0, 1.0))
 
 
 func set_aim(angle: float) -> void:
@@ -174,6 +201,7 @@ func play(anim: int, strength: float = 0.3) -> void:
 			_flash_t = 0.0
 		Anim.SHOOT:
 			_recoil = clampf(strength, 0.05, 1.0)
+			_kick = 0.06 + 0.16 * _recoil
 		Anim.DEATH:
 			_start_death()
 		_:
@@ -203,6 +231,7 @@ func _start_death() -> void:
 	_death_done = false
 	_name_tag.visible = false
 	_shadow.visible = false
+	set_stunned(false)
 	set_weapon(0)
 
 
@@ -213,6 +242,7 @@ func _process(delta: float) -> void:
 		return
 	_animate(delta)
 	_update_weapon_holder()
+	_spin_stars(delta)
 	if _flash_t >= 0.0:
 		_flash_t += delta
 		_set_flash(_flash_t < HIT_FLASH_TIME)
@@ -262,7 +292,7 @@ func _animate(delta: float) -> void:
 			arm_b = -2.6 - sin(_time * 14.0) * 0.15
 	# Weapon pose overlay (hold_weapon): front arm points along the aim.
 	if _weapon_id != 0:
-		arm_f = -PI * 0.5 - aim_angle + _recoil * 0.9
+		arm_f = -PI * 0.5 - _aim_smooth + _recoil * 0.9
 	_recoil = move_toward(_recoil, 0.0, delta * 6.0)
 	# One-shot overlays.
 	if _oneshot >= 0:
@@ -287,12 +317,29 @@ func _animate(delta: float) -> void:
 		lean -= 0.35 * sin(clampf(_hit_t / HIT_TIME, 0.0, 1.0) * PI)
 		if _hit_t >= HIT_TIME:
 			_hit_t = -1.0
-	_arm_f.rotation.x = arm_f
-	_arm_b.rotation.x = arm_b
-	_leg_f.rotation.x = leg_f
-	_leg_b.rotation.x = leg_b
-	_torso.rotation.x = lean * 0.5
-	_head.rotation.x = lean * 0.3
+	# v1.1: blend every limb toward its target pose for smooth transitions.
+	if _stunned:
+		lean += sin(_time * 9.0) * 0.18
+		arm_f = 0.5 + sin(_time * 7.0) * 0.3
+		arm_b = -0.5 - sin(_time * 7.0) * 0.3
+	var k: float = 1.0 - exp(-LIMB_RATE * delta)
+	var ka: float = 1.0 - exp(-(LIMB_RATE * 2.0 if _oneshot >= 0 or _weapon_id != 0 else LIMB_RATE) * delta)
+	_s_arm_f = lerp_angle(_s_arm_f, arm_f, ka)
+	_s_arm_b = lerp_angle(_s_arm_b, arm_b, k)
+	_s_leg_f = lerp_angle(_s_leg_f, leg_f, k)
+	_s_leg_b = lerp_angle(_s_leg_b, leg_b, k)
+	_s_lean = lerpf(_s_lean, lean, k)
+	_s_bob = lerpf(_s_bob, bob, k)
+	_arm_f.rotation.x = _s_arm_f
+	_arm_b.rotation.x = _s_arm_b
+	_leg_f.rotation.x = _s_leg_f
+	_leg_b.rotation.x = _s_leg_b
+	_torso.rotation.x = _s_lean * 0.5
+	_head.rotation.x = _s_lean * 0.3
+	if _stunned:
+		_head.rotation.z = sin(_time * 9.0) * 0.2
+	else:
+		_head.rotation.z = lerpf(_head.rotation.z, 0.0, k)
 	# Whole-body flip (double jump) and squash (land).
 	var flip_angle: float = 0.0
 	if _flip_t >= 0.0:
@@ -308,16 +355,34 @@ func _animate(delta: float) -> void:
 		squash = sin(clampf(_land_t / LAND_TIME, 0.0, 1.0) * PI) * 0.22
 		if _land_t >= LAND_TIME:
 			_land_t = -1.0
+	# Take-off stretch when leaving the ground.
+	var airborne: bool = _base == Anim.JUMP or _base == Anim.FALL
+	if airborne and not _was_airborne and _base == Anim.JUMP:
+		_stretch = 0.14
+	_was_airborne = airborne
+	_stretch = move_toward(_stretch, 0.0, delta * 0.8)
+	var sy: float = 1.0 - squash + _stretch
+	var sxz: float = 1.0 + squash * 0.6 - _stretch * 0.5
 	_flip.rotation = Vector3(0.0, 0.0, flip_angle)
-	_flip.position = Vector3(0.0, 0.9 + bob - squash * 0.9 * 0.5, 0.0)
-	_flip.scale = Vector3(1.0 + squash * 0.6, 1.0 - squash, 1.0 + squash * 0.6)
+	_flip.position = Vector3(0.0, 0.9 + _s_bob - squash * 0.9 * 0.5, 0.0)
+	_flip.scale = Vector3(sxz, sy, sxz)
+	# Eased facing turn.
+	var target_face: float = float(facing)
+	if _face_blend != target_face:
+		_face_blend = move_toward(_face_blend, target_face, delta * 2.0 / TURN_TIME)
+		_apply_facing()
 
 
 func _update_weapon_holder() -> void:
 	if _weapon_node == null:
 		return
-	var b := Basis(Vector3.FORWARD, -aim_angle) if facing > 0 else Basis(Vector3.UP, PI) * Basis(Vector3.FORWARD, -aim_angle)
-	_weapon_holder.global_transform = Transform3D(b, _hand.global_position + Vector3(0, 0, 0.12))
+	var dt: float = get_process_delta_time()
+	_aim_smooth = lerp_angle(_aim_smooth, aim_angle, 1.0 - exp(-AIM_RATE * dt))
+	_kick = move_toward(_kick, 0.0, dt * 1.6)
+	var b := Basis(Vector3.FORWARD, -_aim_smooth) if facing > 0 else Basis(Vector3.UP, PI) * Basis(Vector3.FORWARD, -_aim_smooth)
+	# Recoil kick slides the gun back along its barrel.
+	var back: Vector3 = b * Vector3(-_kick, 0, 0)
+	_weapon_holder.global_transform = Transform3D(b, _hand.global_position + Vector3(0, 0, 0.12) + back)
 
 
 ## Topples backwards, bounces once, fades over 0.6 s, then pops (§6.3).
@@ -363,3 +428,31 @@ func _physics_process(_delta: float) -> void:
 	var dist: float = from.y - hp.y
 	var s: float = clampf(1.0 - dist * 0.06, 0.4, 1.0)
 	_shadow.scale = Vector3(s, 1.0, s)
+
+
+## v1.1: stunned after two melee hits — wobble + orbiting stars over the head.
+func set_stunned(on: bool) -> void:
+	if on == _stunned:
+		return
+	_stunned = on
+	if on and _stars == null:
+		_stars = Node3D.new()
+		_stars.position = Vector3(0, 2.0, 0)
+		var m := BoxMesh.new()
+		m.size = Vector3(0.12, 0.12, 0.12)
+		for i: int in range(3):
+			var star := MeshInstance3D.new()
+			star.mesh = m
+			star.material_override = MaterialCache.flat(Palette.GOLD)
+			var ang: float = TAU * float(i) / 3.0
+			star.position = Vector3(cos(ang) * 0.35, 0, sin(ang) * 0.35)
+			star.rotation = Vector3(0.6, 0.6, 0)
+			_stars.add_child(star)
+		add_child(_stars)
+	if _stars != null:
+		_stars.visible = on
+
+
+func _spin_stars(delta: float) -> void:
+	if _stars != null and _stars.visible:
+		_stars.rotation.y += delta * 6.0

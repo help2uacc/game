@@ -1,11 +1,20 @@
 class_name TouchControls
 extends Control
 ## Touch controls (PRD §8): floating joystick on the left half, Attack, Jump,
-## Pick Up, Throw on the right; multi-touch. Debug keyboard controls on
-## desktop (A/D move, S down, Space jump, J attack, K pick up, L throw).
+## Pick Up, Throw on the right; multi-touch. v1.1: bigger buttons and manual
+## aim — press Attack to fire, drag from it to aim (release = stop).
+## Debug keyboard controls on desktop (A/D move, S down, Space jump, J attack,
+## K pick up, L throw); on desktop the mouse pointer aims.
 
 
 const JOYSTICK_RADIUS := 110.0
+const ATTACK_SIZE := 230.0
+const JUMP_SIZE := 190.0
+const PICKUP_SIZE := 170.0
+const THROW_SIZE := 150.0
+## Drag distance (design px) from the Attack centre for a full aim vector.
+const AIM_RADIUS := 150.0
+const AIM_DEADZONE := 0.18
 const ICON_DIR := "res://assets/ui/icons/"
 
 var attack_btn: TouchButton
@@ -23,16 +32,18 @@ var _pickup_latch: bool = false
 var _throw_latch: bool = false
 var _enabled: bool = true
 var _weapon_icon_key: String = ""
+var _aim_pos: Vector2 = Vector2.ZERO
+var _aim_vec: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_keyboard = not OS.has_feature("mobile")
-	attack_btn = _make_button(160.0, "attack")
-	jump_btn = _make_button(130.0, "jump")
-	pickup_btn = _make_button(100.0, "pickup")
-	throw_btn = _make_button(100.0, "throw")
+	attack_btn = _make_button(ATTACK_SIZE, "attack")
+	jump_btn = _make_button(JUMP_SIZE, "jump")
+	pickup_btn = _make_button(PICKUP_SIZE, "pickup")
+	throw_btn = _make_button(THROW_SIZE, "throw")
 	pickup_btn.visible = false
 	throw_btn.visible = false
 	resized.connect(_layout)
@@ -51,10 +62,10 @@ func _layout() -> void:
 	var r: Rect2 = _safe_rect()
 	var right: float = r.end.x
 	var bottom: float = r.end.y
-	attack_btn.position = Vector2(right - 360, bottom - 330)
-	jump_btn.position = Vector2(right - 170, bottom - 170)
-	pickup_btn.position = Vector2(right - 330, bottom - 470)
-	throw_btn.position = Vector2(right - 500, bottom - 300)
+	jump_btn.position = Vector2(right - JUMP_SIZE, bottom - JUMP_SIZE)
+	attack_btn.position = Vector2(right - 460, bottom - 340)
+	pickup_btn.position = Vector2(right - 430, bottom - 540)
+	throw_btn.position = Vector2(right - 640, bottom - 250)
 
 
 func _safe_rect() -> Rect2:
@@ -81,6 +92,7 @@ func set_enabled(on: bool) -> void:
 func _release_all() -> void:
 	_joy_index = -1
 	_joy_vec = Vector2.ZERO
+	_aim_vec = Vector2.ZERO
 	for b: TouchButton in [attack_btn, jump_btn, pickup_btn, throw_btn]:
 		b.touch_index = -1
 		b.set_pressed(false)
@@ -119,6 +131,9 @@ func _input(event: InputEvent) -> void:
 		if d.index == _joy_index:
 			_joy_pos = d.position
 			_update_joy()
+		elif d.index == attack_btn.touch_index:
+			_aim_pos = d.position
+			_update_aim()
 
 
 func _touch_down(index: int, pos: Vector2) -> void:
@@ -126,6 +141,9 @@ func _touch_down(index: int, pos: Vector2) -> void:
 		if b.touch_index == -1 and b.hit(pos):
 			b.touch_index = index
 			b.set_pressed(true)
+			if b == attack_btn:
+				_aim_pos = pos
+				_update_aim()
 			if b == jump_btn:
 				_jump_latch = true
 			elif b == pickup_btn:
@@ -149,6 +167,23 @@ func _touch_up(index: int) -> void:
 		if b.touch_index == index:
 			b.touch_index = -1
 			b.set_pressed(false)
+			if b == attack_btn:
+				_aim_vec = Vector2.ZERO
+				queue_redraw()
+
+
+func _update_aim() -> void:
+	var c: Vector2 = attack_btn.position + attack_btn.size * 0.5
+	var d: Vector2 = (_aim_pos - c) / AIM_RADIUS
+	if d.length() > 1.0:
+		d = d.normalized()
+	_aim_vec = d if d.length() >= AIM_DEADZONE else Vector2.ZERO
+	queue_redraw()
+
+
+## True while the Attack stick is dragged out of its dead zone.
+func has_touch_aim() -> bool:
+	return _aim_vec != Vector2.ZERO
 
 
 func _update_joy() -> void:
@@ -199,6 +234,9 @@ func read_input(target: PlayerInput) -> void:
 	target.jump_pressed = _jump_latch
 	target.pickup_pressed = _pickup_latch
 	target.throw_pressed = _throw_latch
+	# Screen y points down, world y up.
+	target.aim_x = _aim_vec.x
+	target.aim_y = -_aim_vec.y
 
 
 ## Clears latched presses once the authority has seen them.
@@ -212,6 +250,12 @@ func ack_presses(jump: bool, pickup: bool, throw: bool) -> void:
 
 
 func _draw() -> void:
+	if attack_btn != null and attack_btn.is_pressed:
+		var c: Vector2 = attack_btn.position + attack_btn.size * 0.5
+		draw_arc(c, AIM_RADIUS, 0, TAU, 48, Color(1, 1, 1, 0.35), 4.0)
+		if _aim_vec != Vector2.ZERO:
+			draw_line(c, c + _aim_vec * AIM_RADIUS, Color(1, 1, 1, 0.6), 6.0)
+			draw_circle(c + _aim_vec * AIM_RADIUS, 34.0, Color(1, 1, 1, 0.7))
 	if _joy_index == -1:
 		return
 	draw_circle(_joy_origin, JOYSTICK_RADIUS, Color(1, 1, 1, 0.18))
