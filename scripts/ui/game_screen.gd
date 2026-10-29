@@ -61,6 +61,10 @@ func _ready() -> void:
 
 func _start_sandbox() -> void:
 	_new_world(true)
+	if OS.is_debug_build():
+		for a: String in OS.get_cmdline_user_args():
+			if a.begins_with("--map="):
+				sandbox_map = a.trim_prefix("--map=")
 	world.load_map(sandbox_map)
 	world.add_player(1, 0, Settings.player_name if Settings.has_player_name() else "Player", true)
 	# Two idle training dummies to test weapons on.

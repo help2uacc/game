@@ -110,7 +110,7 @@ func _build_podium(order: Array[int]) -> void:
 	var cam := Camera3D.new()
 	cam.fov = 40.0
 	cam.keep_aspect = Camera3D.KEEP_WIDTH
-	cam.position = Vector3(6.5, 3.2, 17)
+	cam.position = Vector3(4.0, 3.4, 24)
 	cam.rotation = Vector3(deg_to_rad(-6.0), 0, 0)
 	cam.current = true
 	root3d.add_child(cam)
@@ -152,7 +152,7 @@ func _build_podium(order: Array[int]) -> void:
 	_confetti.lifetime = 3.0
 	_confetti.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
 	_confetti.emission_box_extents = Vector3(7, 0.2, 1.5)
-	_confetti.position = Vector3(0, 9, 0)
+	_confetti.position = Vector3(0, 7.0, 0)
 	_confetti.direction = Vector3(0, -1, 0)
 	_confetti.initial_velocity_min = 0.5
 	_confetti.initial_velocity_max = 2.0

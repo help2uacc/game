@@ -18,7 +18,7 @@ MIN_W, MAX_W = 70, 100
 MIN_H, MAX_H = 30, 45
 MIN_S, MIN_W_POINTS, MIN_I = 8, 10, 3
 SPAWN_DROP = 6
-EXPECTED_MAPS = 0  # raised to 12 in M5
+EXPECTED_MAPS = 12
 
 
 def validate(path: Path) -> list:

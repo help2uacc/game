@@ -44,6 +44,7 @@ var _weapon_key: String = ""
 var _score_dirty: bool = true
 var _swipe_start: Vector2 = Vector2.ZERO
 var _swipe_index: int = -1
+var _bottom_center: Control
 
 
 func _ready() -> void:
@@ -177,6 +178,7 @@ func _build_top_right() -> void:
 
 func _build_spectate_bar() -> void:
 	var bottom: Control = _corner(Control.PRESET_CENTER_BOTTOM)
+	_bottom_center = bottom
 	_spectate_bar = UiKit.hbox(24)
 	_spectate_bar.alignment = BoxContainer.ALIGNMENT_CENTER
 	_spectate_bar.position = Vector2(-450, -150)
@@ -319,7 +321,16 @@ func _rebuild_scoreboard() -> void:
 
 
 # ---------------------------------------------------------------- per frame
+func _layout_corners() -> void:
+	var vp: Vector2 = get_viewport_rect().size
+	_top_left.position = Vector2.ZERO
+	_top_center.position = Vector2(vp.x * 0.5, 0)
+	_top_right.position = Vector2(vp.x, 0)
+	_bottom_center.position = Vector2(vp.x * 0.5, vp.y)
+
+
 func _process(delta: float) -> void:
+	_layout_corners()
 	if world == null:
 		return
 	if _score_dirty:

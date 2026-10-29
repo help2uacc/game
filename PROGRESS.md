@@ -9,9 +9,9 @@ unchecked milestone. Run `tools/check.sh` after every change.
 - [x] M2 Local sandbox
 - [x] M3 Combat
 - [x] M4 Networking
-- [ ] M5 Match flow
+- [x] M5 Match flow
 - [ ] M6 UI & polish
 - [ ] M7 Android & performance
 
 ## Current state
-M4 done. Next: M5 (match flow polish, spectate, results, all 12 maps).
+M5 done. Next: M6 (UI & polish pass: settings, HUD toggles, toasts, audio, shake, quality presets).

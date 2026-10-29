@@ -252,7 +252,8 @@ func _process(delta: float) -> void:
 # ================================================================ multiplayer signals
 func _on_peer_connected(peer_id: int) -> void:
 	# The client introduces itself with _c_hello. Detect dead peers quickly.
-	_set_fast_timeout(peer_id)
+	if role == Role.HOST:
+		_set_fast_timeout(peer_id)
 
 
 func _set_fast_timeout(peer_id: int) -> void:

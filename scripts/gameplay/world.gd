@@ -934,8 +934,7 @@ func spawn_random_weapon() -> bool:
 	if pt == null:
 		return false
 	var wid: int = int(Rules.weighted_pick(WeaponDB.weapon_weights(), rng))
-	var pk: PickupState = spawn_pickup(PickupState.Kind.WEAPON, wid, WeaponDB.weapon(wid).ammo, pt, true)
-	pk.resting = true
+	spawn_pickup(PickupState.Kind.WEAPON, wid, WeaponDB.weapon(wid).ammo, pt, true)
 	return true
 
 
@@ -945,8 +944,7 @@ func spawn_random_item() -> bool:
 		return false
 	var iid: int = int(Rules.weighted_pick(WeaponDB.item_weights(), rng))
 	var kind: int = PickupState.Kind.HEALTH if iid == GameConfig.ItemId.HEALTH else PickupState.Kind.ARMOR
-	var pk: PickupState = spawn_pickup(kind, 0, 0, pt, true)
-	pk.resting = true
+	spawn_pickup(kind, 0, 0, pt, true)
 	return true
 
 

@@ -38,3 +38,9 @@
 - `MatchManager` RPC hub: 60 Hz unreliable_ordered inputs with latched presses + ack, 30 Hz packed snapshots (~0.6 KB for 8 players), batched reliable events, map load sync (`load_map` → `map_ready`, 10 s timeout), 100 ms interpolation buffer on clients.
 - Screens: main menu (animated background, name prompt, REJOIN), join (host list + manual IP), lobby (slots, colour picker, name, ready, rounds stepper with long-press, START, leave confirm), game screen (HUD, controls, menu/reconnect overlays), settings, match results.
 - `tools/net_smoke_test.sh`: automated localhost match with 1 host + N bot clients (debug-only args), including a simulated connection loss.
+
+## M5 — Match flow
+- All 12 maps authored (`tools/author_maps.py` → `data/maps/*.json`): Candy Plains, Mint Towers, Lava Lagoon, Cloud Hop, Crate Yard, Spike Factory, Bubblegum Bridges, Lilac Caves, Peach Pyramid, Sky Lifts, Bounce Garden, Sorbet Arena; mirror-symmetric, validated, plus a jump-envelope reachability check in the authoring tool.
+- Match flow on the server: shuffled map rotation (no repeat across reshuffles), load sync, 3 s countdown (frozen), 300 s fight, end at ≤1 alive or timer, round winner / DRAW, round wins, 6 s Round Results overlay with progress bar, Match Results (podium, jumping winner, confetti, table, BACK TO LOBBY / LEAVE), early match end when < 2 players remain after reconnect windows.
+- Spectate mode for dead players (camera follows a living player, ◀ ▶ buttons and swipe, "SPECTATING: name").
+- HUD corner layout fix; tests: 12-map parse/validate/symmetry/hazard/build tests.
