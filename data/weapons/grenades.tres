@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="WeaponData" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/weapon_data.gd" id="1_bg8vi"]
+
+[resource]
+script = ExtResource("1_bg8vi")
+id = 6
+key = "grenades"
+display_name = "Grenades"
+kind = 2
+damage = 70
+ammo = 3
+weapon_range = 16.0
+knockback = 12.0
+splash_radius = 3.5
+splash_edge_damage = 15
+fuse_time = 2.0
+self_damage_factor = 0.5
+destroys_crates = true
+spawn_weight = 15
+recoil = 0.2
+sfx = "grenade_throw"
+icon = "res://assets/ui/icons/grenades.svg"
+scene_path = "res://scenes/weapons/grenade.tscn"

@@ -1,0 +1,8 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://assets/shaders/flat_block.gdshader" id="1_2pvt7"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_2pvt7")
+shader_parameter/albedo = Color(0.56078434, 0.8392157, 0.5803922, 1)

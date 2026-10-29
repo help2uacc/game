@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="MapTheme" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/map_theme.gd" id="1_lg14r"]
+
+[resource]
+script = ExtResource("1_lg14r")
+id = "peach"
+primary = Color(1, 0.8156863, 0.6901961, 1)
+secondary = Color(0.9490196, 0.8666667, 0.6901961, 1)
+platform = Color(0.9185196, 0.80638236, 0.65568626, 1)
+crate = Color(0.9098039, 0.74509805, 0.5411765, 1)
+bg_top = Color(1, 0.92156863, 0.8666667, 1)
+bg_bottom = Color(1, 0.972549, 0.93333334, 1)
+decor_a = Color(1, 0.9239706, 0.87220585, 1)
+decor_b = Color(0.96686274, 0.92671573, 0.84068626, 1)

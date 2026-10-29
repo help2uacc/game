@@ -1,0 +1,8 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://assets/shaders/flat_block.gdshader" id="1_n23vw"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_n23vw")
+shader_parameter/albedo = Color(0.7058824, 0.6117647, 1, 1)

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="MapTheme" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/map_theme.gd" id="1_fuwqe"]
+
+[resource]
+script = ExtResource("1_fuwqe")
+id = "garden"
+primary = Color(0.6627451, 0.8980392, 0.627451, 1)
+secondary = Color(1, 0.72156864, 0.8117647, 1)
+platform = Color(0.83786273, 0.7441667, 0.70989215, 1)
+crate = Color(0.9098039, 0.74509805, 0.5411765, 1)
+bg_top = Color(0.8901961, 0.96862745, 0.8745098, 1)
+bg_bottom = Color(1, 0.95686275, 0.972549, 1)
+decor_a = Color(0.8468628, 0.94392157, 0.83230394, 1)
+decor_b = Color(1, 0.8642647, 0.9082353, 1)

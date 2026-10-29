@@ -1,0 +1,9 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://assets/shaders/flat_vertex.gdshader" id="1_h5l4k"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_h5l4k")
+shader_parameter/tint = null
+shader_parameter/flash = 0.6

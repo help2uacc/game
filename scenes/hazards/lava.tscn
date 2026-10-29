@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/lava.gd" id="1_7rfv8"]
+[ext_resource type="Material" path="res://assets/materials/white.tres" id="2_kab50"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_ovssa"]
+size = Vector3(0.14, 0.14, 0.14)
+
+[sub_resource type="Curve" id="Curve_uety0"]
+_data = [Vector2(0, 0.2), 0.0, 0.0, 0, 0, Vector2(0.5, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[node name="Lava" type="Node3D" unique_id=1217306140]
+script = ExtResource("1_7rfv8")
+
+[node name="Bubbles" type="CPUParticles3D" parent="." unique_id=1832803605]
+material_override = ExtResource("2_kab50")
+amount = 6
+lifetime = 1.2
+mesh = SubResource("BoxMesh_ovssa")
+emission_shape = 3
+emission_box_extents = Vector3(0.5, 0.05, 0.35)
+direction = Vector3(0, 1, 0)
+spread = 10.0
+gravity = Vector3(0, 0, 0)
+initial_velocity_min = 0.3
+initial_velocity_max = 0.8
+scale_amount_min = 0.5
+scale_amount_max = 1.2
+scale_amount_curve = SubResource("Curve_uety0")

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="MapTheme" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/map_theme.gd" id="1_et8e0"]
+
+[resource]
+script = ExtResource("1_et8e0")
+id = "mint"
+primary = Color(0.62352943, 0.8862745, 0.7764706, 1)
+secondary = Color(0.95686275, 1, 0.9764706, 1)
+platform = Color(0.79818624, 0.91218626, 0.86114705, 1)
+crate = Color(0.9098039, 0.74509805, 0.5411765, 1)
+bg_top = Color(0.8666667, 0.96862745, 0.93333334, 1)
+bg_bottom = Color(0.96862745, 1, 0.9843137, 1)
+decor_a = Color(0.82906866, 0.937451, 0.89215684, 1)
+decor_b = Color(0.9789706, 1, 0.9885294, 1)

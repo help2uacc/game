@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="MapTheme" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/map_theme.gd" id="1_yb5pp"]
+
+[resource]
+script = ExtResource("1_yb5pp")
+id = "cloud"
+primary = Color(0.654902, 0.827451, 1, 1)
+platform = Color(0.8352549, 0.8926275, 0.95, 1)
+crate = Color(0.9098039, 0.74509805, 0.5411765, 1)
+bg_top = Color(0.8117647, 0.9019608, 1, 1)
+bg_bottom = Color(0.9529412, 0.9764706, 1, 1)
+decor_a = Color(0.85764706, 0.9288235, 1, 1)

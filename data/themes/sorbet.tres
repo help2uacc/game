@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="MapTheme" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/map_theme.gd" id="1_l3cv6"]
+
+[resource]
+script = ExtResource("1_l3cv6")
+id = "sorbet"
+primary = Color(1, 0.76862746, 0.8392157, 1)
+secondary = Color(0.76862746, 0.9098039, 1, 1)
+platform = Color(0.8071274, 0.81737256, 0.8965392, 1)
+crate = Color(0.9098039, 0.74509805, 0.5411765, 1)
+bg_top = Color(1, 0.91764706, 0.94509804, 1)
+bg_bottom = Color(0.9411765, 0.972549, 1, 1)
+decor_a = Color(1, 0.90455884, 0.9336765, 1)
+decor_b = Color(0.88720584, 0.9560294, 1, 1)
+accents = Array[Color]([Color(1, 0.8509804, 0.65882355, 1), Color(1, 0.9490196, 0.65882355, 1), Color(0.78431374, 0.9490196, 0.7607843, 1), Color(0.8509804, 0.7882353, 1, 1)])

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WeaponData" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/weapon_data.gd" id="1_ihp4e"]
+
+[resource]
+script = ExtResource("1_ihp4e")
+id = 1
+key = "pistol"
+display_name = "Pistol"
+damage = 18
+fire_rate = 3.0
+ammo = 12
+weapon_range = 25.0
+spread_deg = 2.0
+knockback = 2.0
+spawn_weight = 25
+sfx = "pistol"
+icon = "res://assets/ui/icons/pistol.svg"
+scene_path = "res://scenes/weapons/pistol.tscn"

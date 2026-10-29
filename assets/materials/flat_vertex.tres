@@ -1,0 +1,9 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://assets/shaders/flat_vertex.gdshader" id="1_bp5lu"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_bp5lu")
+shader_parameter/tint = null
+shader_parameter/flash = null

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="MapTheme" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/map_theme.gd" id="1_5wekf"]
+
+[resource]
+script = ExtResource("1_5wekf")
+id = "lava"
+primary = Color(1, 0.79607844, 0.6431373, 1)
+secondary = Color(1, 0.61960787, 0.5411765, 1)
+platform = Color(0.95, 0.64730394, 0.5480196, 1)
+lava = Color(1, 0.54901963, 0.25882354, 1)
+crate = Color(0.9098039, 0.74509805, 0.5411765, 1)
+bg_top = Color(1, 0.9019608, 0.8352941, 1)
+bg_bottom = Color(1, 0.9529412, 0.9098039, 1)
+decor_a = Color(1, 0.91588235, 0.8527941, 1)
+decor_b = Color(1, 0.8145588, 0.77632356, 1)

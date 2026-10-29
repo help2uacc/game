@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="WeaponData" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/weapon_data.gd" id="1_71etv"]
+
+[resource]
+script = ExtResource("1_71etv")
+key = "punch"
+display_name = "Punch"
+kind = 3
+damage = 12
+fire_rate = 2.2222222222222223
+weapon_range = 1.2
+knockback = 5.0
+sfx = "punch_swing"
+icon = "res://assets/ui/icons/punch.svg"

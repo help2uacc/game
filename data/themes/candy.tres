@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="MapTheme" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/map_theme.gd" id="1_1u2cr"]
+
+[resource]
+script = ExtResource("1_1u2cr")
+id = "candy"
+primary = Color(0.96862745, 0.65882355, 0.76862746, 1)
+secondary = Color(1, 0.94509804, 0.8392157, 1)
+platform = Color(0.93956864, 0.8026569, 0.7737843, 1)
+crate = Color(0.9098039, 0.74509805, 0.5411765, 1)
+bg_top = Color(1, 0.8901961, 0.93333334, 1)
+bg_bottom = Color(1, 0.972549, 0.9254902, 1)
+decor_a = Color(0.9827451, 0.854951, 0.9002451, 1)
+decor_b = Color(1, 0.9732353, 0.9216177, 1)

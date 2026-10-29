@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="MapTheme" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/map_theme.gd" id="1_xw30s"]
+
+[resource]
+script = ExtResource("1_xw30s")
+id = "sky"
+primary = Color(0.7490196, 0.8784314, 1, 1)
+secondary = Color(0.7411765, 0.9411765, 0.84705883, 1)
+platform = Color(0.7067255, 0.8732549, 0.8555588, 1)
+crate = Color(0.9098039, 0.74509805, 0.5411765, 1)
+bg_top = Color(0.8627451, 0.93333334, 1, 1)
+bg_bottom = Color(0.9490196, 1, 0.972549, 1)
+decor_a = Color(0.89647055, 0.94985294, 1, 1)
+decor_b = Color(0.86426467, 0.9617647, 0.91588235, 1)

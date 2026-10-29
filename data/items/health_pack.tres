@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/item_data.gd" id="1_f61l7"]
+
+[resource]
+script = ExtResource("1_f61l7")
+key = "health_pack"
+display_name = "Health Pack"
+heal_amount = 40
+spawn_weight = 60
+sfx = "pickup_health"
+scene_path = "res://scenes/pickups/health_pack.tscn"

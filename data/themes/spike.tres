@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="MapTheme" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/map_theme.gd" id="1_roiig"]
+
+[resource]
+script = ExtResource("1_roiig")
+id = "spike"
+primary = Color(0.78039217, 0.72156864, 0.9607843, 1)
+secondary = Color(0.7882353, 0.7764706, 0.827451, 1)
+platform = Color(0.7462157, 0.7193921, 0.8304118, 1)
+crate = Color(0.9098039, 0.74509805, 0.5411765, 1)
+bg_top = Color(0.9019608, 0.8784314, 0.98039216, 1)
+bg_bottom = Color(0.9607843, 0.9529412, 0.98039216, 1)
+decor_a = Color(0.9040196, 0.87975484, 0.97843134, 1)
+decor_b = Color(0.86872554, 0.8629902, 0.88784313, 1)

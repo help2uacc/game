@@ -5,7 +5,7 @@ unchecked milestone. Run `tools/check.sh` after every change.
 
 ## Milestones
 - [x] M0 Project setup
-- [ ] M1 Assets
+- [x] M1 Assets
 - [ ] M2 Local sandbox
 - [ ] M3 Combat
 - [ ] M4 Networking
@@ -14,4 +14,4 @@ unchecked milestone. Run `tools/check.sh` after every change.
 - [ ] M7 Android & performance
 
 ## Current state
-M0 done.
+M1 done. Next: M2 (map loader, player controller, camera, touch controls, sandbox).

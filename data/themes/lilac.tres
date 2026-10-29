@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="MapTheme" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/map_theme.gd" id="1_hod2b"]
+
+[resource]
+script = ExtResource("1_hod2b")
+id = "lilac"
+primary = Color(0.83137256, 0.7490196, 0.9490196, 1)
+secondary = Color(0.65882355, 0.54509807, 0.78039217, 1)
+platform = Color(0.6832549, 0.5856471, 0.7974412, 1)
+lava = Color(1, 0.54901963, 0.3529412, 1)
+crate = Color(0.9098039, 0.74509805, 0.5411765, 1)
+bg_top = Color(0.9137255, 0.8666667, 0.972549, 1)
+bg_bottom = Color(0.9647059, 0.9411765, 0.9882353, 1)
+decor_a = Color(0.9234314, 0.88946074, 0.9719608, 1)
+decor_b = Color(0.7979902, 0.742549, 0.8572549, 1)

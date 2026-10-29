@@ -1,0 +1,8 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://assets/shaders/flat_block.gdshader" id="1_h3ws8"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_h3ws8")
+shader_parameter/albedo = Color(1, 0.69803923, 0.41960785, 1)

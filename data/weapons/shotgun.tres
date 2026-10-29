@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="WeaponData" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/weapon_data.gd" id="1_euj80"]
+
+[resource]
+script = ExtResource("1_euj80")
+id = 3
+key = "shotgun"
+display_name = "Shotgun"
+damage = 9
+pellets = 6
+fire_rate = 1.2
+ammo = 6
+spread_deg = 15.0
+knockback = 8.0
+spawn_weight = 20
+recoil = 0.7
+sfx = "shotgun"
+icon = "res://assets/ui/icons/shotgun.svg"
+scene_path = "res://scenes/weapons/shotgun.tscn"

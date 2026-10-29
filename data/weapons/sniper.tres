@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="WeaponData" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/weapon_data.gd" id="1_64gn2"]
+
+[resource]
+script = ExtResource("1_64gn2")
+id = 4
+key = "sniper"
+display_name = "Sniper"
+damage = 70
+fire_rate = 0.8
+ammo = 4
+weapon_range = 60.0
+knockback = 10.0
+spawn_weight = 12
+shake = 0.1
+recoil = 0.9
+sfx = "sniper"
+icon = "res://assets/ui/icons/sniper.svg"
+scene_path = "res://scenes/weapons/sniper.tscn"

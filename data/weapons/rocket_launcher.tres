@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="WeaponData" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/weapon_data.gd" id="1_dxfmi"]
+
+[resource]
+script = ExtResource("1_dxfmi")
+id = 5
+key = "rocket_launcher"
+display_name = "Rocket Launcher"
+kind = 1
+damage = 60
+fire_rate = 0.7
+ammo = 3
+weapon_range = 40.0
+knockback = 14.0
+splash_radius = 3.0
+splash_edge_damage = 20
+projectile_speed = 18.0
+projectile_lifetime = 3.0
+self_damage_factor = 0.5
+destroys_crates = true
+spawn_weight = 8
+shake = 0.1
+recoil = 1.0
+sfx = "rocket_launch"
+icon = "res://assets/ui/icons/rocket_launcher.svg"
+scene_path = "res://scenes/weapons/rocket_launcher.tscn"

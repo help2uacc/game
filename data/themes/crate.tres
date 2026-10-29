@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="MapTheme" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/map_theme.gd" id="1_y8k7q"]
+
+[resource]
+script = ExtResource("1_y8k7q")
+id = "crate"
+primary = Color(1, 0.8901961, 0.6039216, 1)
+secondary = Color(0.7882353, 0.6431373, 0.5294118, 1)
+platform = Color(0.8192353, 0.69312745, 0.5277157, 1)
+crate = Color(0.8509804, 0.64705884, 0.47843137, 1)
+bg_top = Color(1, 0.95686275, 0.8117647, 1)
+bg_bottom = Color(1, 0.9843137, 0.91764706, 1)
+decor_a = Color(1, 0.9547059, 0.83661765, 1)
+decor_b = Color(0.86235297, 0.79161763, 0.7361765, 1)

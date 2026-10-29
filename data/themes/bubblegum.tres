@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="MapTheme" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/map_theme.gd" id="1_cr1na"]
+
+[resource]
+script = ExtResource("1_cr1na")
+id = "bubblegum"
+primary = Color(1, 0.7019608, 0.8509804, 1)
+secondary = Color(0.8509804, 0.72156864, 0.9411765, 1)
+platform = Color(0.8579804, 0.6789706, 0.8641274, 1)
+crate = Color(0.9098039, 0.74509805, 0.5411765, 1)
+bg_top = Color(1, 0.8784314, 0.9411765, 1)
+bg_bottom = Color(0.972549, 0.9411765, 1, 1)
+decor_a = Color(1, 0.8770588, 0.9385294, 1)
+decor_b = Color(0.91779417, 0.8547059, 0.9617647, 1)
