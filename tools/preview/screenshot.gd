@@ -1,6 +1,7 @@
 extends SceneTree
 ## Renders a scene to a PNG for visual checks:
-## xvfb-run -a godot --rendering-driver opengl3 --resolution 1280x720 -s tools/preview/screenshot.gd -- <scene> <out.png> [frames]
+## xvfb-run -a godot --rendering-driver opengl3 --resolution 1280x720 -s tools/preview/screenshot.gd -- \
+##     --scene=res://scenes/main/main.tscn --out=res://build/shot.png --frames=90 [game args]
 
 var _frames: int = 0
 var _target: int = 90
@@ -8,12 +9,14 @@ var _out: String = "res://build/screenshot.png"
 
 
 func _initialize() -> void:
-	var args: PackedStringArray = OS.get_cmdline_user_args()
-	var scene_path: String = args[0] if args.size() > 0 else "res://scenes/main/sandbox.tscn"
-	if args.size() > 1:
-		_out = args[1]
-	if args.size() > 2:
-		_target = args[2].to_int()
+	var scene_path: String = "res://scenes/main/main.tscn"
+	for a: String in OS.get_cmdline_user_args():
+		if a.begins_with("--scene="):
+			scene_path = a.trim_prefix("--scene=")
+		elif a.begins_with("--out="):
+			_out = a.trim_prefix("--out=")
+		elif a.begins_with("--frames="):
+			_target = a.trim_prefix("--frames=").to_int()
 	var scene: PackedScene = load(scene_path)
 	root.add_child.call_deferred(scene.instantiate())
 

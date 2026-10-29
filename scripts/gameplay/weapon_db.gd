@@ -36,3 +36,8 @@ static func weapon_weights() -> Dictionary:
 static func item_weights() -> Dictionary:
 	return {GameConfig.ItemId.HEALTH: item(GameConfig.ItemId.HEALTH).spawn_weight,
 			GameConfig.ItemId.ARMOR: item(GameConfig.ItemId.ARMOR).spawn_weight}
+
+
+static func clear() -> void:
+	_weapons.clear()
+	_items.clear()

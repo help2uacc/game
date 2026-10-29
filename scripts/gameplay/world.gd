@@ -9,6 +9,7 @@ extends Node3D
 
 signal player_died(victim: int, killer: int, cause: int)
 signal event_emitted(ev: Array)
+signal kill_feed(killer: int, victim: int, cause: int)
 
 const ROCKET_SCENE: PackedScene = preload("res://scenes/weapons/rocket_projectile.tscn")
 const GRENADE_SCENE: PackedScene = preload("res://scenes/weapons/grenade_projectile.tscn")
@@ -50,6 +51,13 @@ var _next_entity_id: int = 1
 var _weapon_spawn_t: float = 0.0
 var _item_spawn_t: float = 0.0
 var _items_started: bool = false
+
+# Client replication (§5.6): snapshot buffer rendered 100 ms in the past.
+var last_snapshot: Dictionary = {}
+var last_snapshot_bytes: int = 0
+var local_ack: int = 0
+var _snapshots: Array[Dictionary] = []
+var _render_time: float = -1.0
 
 
 func _ready() -> void:
@@ -104,6 +112,10 @@ func add_player(pid: int, color_id: int, player_name: String, is_local: bool) ->
 	p.stickman.death_finished.connect(_on_death_finished)
 	players[pid] = p
 	inputs[pid] = PlayerInput.new()
+	# Not part of the round until placed on a spawn (or seen in a snapshot).
+	p.alive = false
+	p.visible = false
+	p.collision_layer = 0
 	if is_local:
 		local_pid = pid
 		camera.target = p
@@ -169,6 +181,153 @@ func _physics_process(delta: float) -> void:
 		return
 	if authority:
 		_server_step(delta)
+
+
+# ================================================================ client replication
+func push_snapshot(s: Dictionary, size_bytes: int) -> void:
+	if not _snapshots.is_empty() and float(s["t"]) <= float(_snapshots.back()["t"]):
+		return  # duplicate or out of order
+	_snapshots.append(s)
+	while _snapshots.size() > 32:
+		_snapshots.pop_front()
+	last_snapshot = s
+	last_snapshot_bytes = size_bytes
+	if _render_time < 0.0:
+		_render_time = float(s["t"]) - GameConfig.INTERP_DELAY
+	_apply_discrete(s)
+
+
+## Discrete state (HP, weapon, alive, ...) from the latest snapshot.
+func _apply_discrete(s: Dictionary) -> void:
+	var sp: Dictionary = s["players"]
+	for pid: int in sp.keys():
+		var p: Player = get_player(pid)
+		if p == null:
+			continue
+		var d: Dictionary = sp[pid]
+		var was_alive: bool = p.alive
+		p.alive = bool(d["alive"])
+		if p.alive and not was_alive:
+			p.stickman.reset_pose()
+		if not p.alive and was_alive:
+			p.stickman.play(Stickman.Anim.DEATH)
+		p.visible = p.alive or p.stickman.is_dead()
+		p.hp = int(d["hp"])
+		p.armor = int(d["armor"])
+		p.weapon_id = int(d["weapon"])
+		p.ammo = int(d["ammo"])
+		if pid == local_pid:
+			local_ack = int(d["ack"])
+	var crates: Array[bool] = s["crates"]
+	for i: int in range(mini(crates.size(), map.crates.size())):
+		if not crates[i] and map.crates[i].alive:
+			map.crates[i].break_crate()
+
+
+func _client_step(delta: float) -> void:
+	if _snapshots.is_empty():
+		return
+	var latest: float = float(_snapshots.back()["t"])
+	var target: float = latest - GameConfig.INTERP_DELAY
+	_render_time += delta
+	if absf(_render_time - target) > 0.25:
+		_render_time = target
+	else:
+		_render_time = lerpf(_render_time, target, 0.05)
+	# Find the two snapshots around the render time.
+	var a: Dictionary = _snapshots[0]
+	var b: Dictionary = _snapshots[0]
+	for i: int in range(_snapshots.size()):
+		var sn: Dictionary = _snapshots[i]
+		if float(sn["t"]) <= _render_time:
+			a = sn
+			b = sn
+		else:
+			b = sn
+			break
+	var ta: float = float(a["t"])
+	var tb: float = float(b["t"])
+	var alpha: float = 0.0 if tb <= ta else clampf((_render_time - ta) / (tb - ta), 0.0, 1.0)
+	_interp_players(a, b, alpha)
+	_interp_projectiles(a, b, alpha)
+	_interp_pickups(a, b, alpha)
+	var ma: Array[Vector2] = a["movers"]
+	var mb: Array[Vector2] = b["movers"]
+	for i: int in range(mini(map.movers.size(), mini(ma.size(), mb.size()))):
+		var mp: Vector2 = ma[i].lerp(mb[i], alpha)
+		map.movers[i].set_remote_position(Vector3(mp.x, mp.y, 0))
+
+
+func _interp_players(a: Dictionary, b: Dictionary, alpha: float) -> void:
+	var pa: Dictionary = a["players"]
+	var pb: Dictionary = b["players"]
+	for pid: int in pb.keys():
+		var p: Player = get_player(pid)
+		if p == null:
+			continue
+		var db: Dictionary = pb[pid]
+		var pos: Vector2 = db["pos"]
+		if pa.has(pid):
+			pos = (pa[pid]["pos"] as Vector2).lerp(pos, alpha)
+		p.global_position = Vector3(pos.x, pos.y, 0)
+		var v: Vector2 = db["vel"]
+		p.velocity = Vector3(v.x, v.y, 0)
+		p.grounded = bool(db["grounded"])
+		p.facing = int(db["facing"])
+		p.aim_angle = float(db["aim"])
+
+
+func _interp_projectiles(a: Dictionary, b: Dictionary, alpha: float) -> void:
+	var pa: Dictionary = a["proj"]
+	var pb: Dictionary = b["proj"]
+	for id: int in projectiles.keys():
+		if not pb.has(id):
+			remove_projectile(projectiles[id])
+	for id2: int in pb.keys():
+		var d: Dictionary = pb[id2]
+		var pr: ProjectileState = projectiles.get(id2) as ProjectileState
+		if pr == null:
+			pr = ProjectileState.new()
+			pr.id = id2
+			pr.type = int(d["type"])
+			pr.weapon_id = int(d["weapon"])
+			pr.node = _make_projectile_node(pr.type, pr.weapon_id)
+			projectiles[id2] = pr
+		var pos: Vector2 = d["pos"]
+		if pa.has(id2):
+			pos = (pa[id2]["pos"] as Vector2).lerp(pos, alpha)
+		pr.pos = Vector3(pos.x, pos.y, 0)
+		var v: Vector2 = d["vel"]
+		pr.vel = Vector3(v.x, v.y, 0)
+		pr.age += get_process_delta_time()
+		_update_projectile_node(pr)
+
+
+func _interp_pickups(a: Dictionary, b: Dictionary, alpha: float) -> void:
+	var pa: Dictionary = a["pickups"]
+	var pb: Dictionary = b["pickups"]
+	for id: int in pickups.keys():
+		if not pb.has(id):
+			remove_pickup(pickups[id])
+	for id2: int in pb.keys():
+		var d: Dictionary = pb[id2]
+		var pk: PickupState = pickups.get(id2) as PickupState
+		if pk == null:
+			pk = PickupState.new()
+			pk.id = id2
+			pk.kind = int(d["kind"])
+			pk.weapon_id = int(d["weapon"])
+			pk.node = make_pickup_node(pk.kind, pk.weapon_id)
+			if bool(d["fresh"]):
+				pk.node.pop()
+			pickups[id2] = pk
+		pk.ammo = int(d["ammo"])
+		var pos: Vector2 = d["pos"]
+		if pa.has(id2):
+			pos = (pa[id2]["pos"] as Vector2).lerp(pos, alpha)
+		pk.pos = Vector3(pos.x, pos.y, 0)
+		pk.node.global_position = pk.pos
+		pk.node.set_blink(bool(d["blink"]))
 
 
 func _server_step(delta: float) -> void:
@@ -843,6 +1002,7 @@ func apply_event(ev: Array) -> void:
 			_fx_hit(int(ev[1]), int(ev[2]), bool(ev[3]), ev[4])
 		GameEvents.DEATH:
 			_fx_death(int(ev[1]), int(ev[3]))
+			kill_feed.emit(int(ev[2]), int(ev[1]), int(ev[3]))
 		GameEvents.PICKUP_SPAWN:
 			effects.burst(ev[2] as Vector3 + Vector3(0, 0.5, 0), Palette.WHITE, 10, 4.0, 0.8, 0.4, -6.0)
 			AudioManager.play_at("spawn_pop", ev[2])
@@ -985,6 +1145,8 @@ func _shake_at(pos: Vector3, amplitude: float, duration: float) -> void:
 
 
 func _process(delta: float) -> void:
+	if not authority and map != null:
+		_client_step(delta)
 	for p: Player in players.values():
 		p.update_visuals(delta)
 

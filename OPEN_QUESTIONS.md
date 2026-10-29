@@ -15,3 +15,8 @@ consistent with the PRD was implemented.
 10. **Explosion knockback** (§7.3): full weapon knockback is applied to every damaged player (not scaled by distance), direction from the explosion centre.
 11. **Punch reach** (§7.3): 1.2 m measured from the attacker's centre to the target's capsule edge, hitting the nearest enemy in front (|Δy| < 1 m); if no player, a crate in front is hit.
 12. **Crate "destroyed by any damage source"** (§10.1): crates have 30 HP and every damage source (bullets, punch, thrown weapons) reduces it; explosions from rockets/grenades destroy crates in their radius outright ("Destroys crates").
+13. **Replication mechanism** (§5.6): instead of `MultiplayerSynchronizer`/`MultiplayerSpawner`, the "equivalent packed RPC" option is used for state *and* entity spawning: every 30 Hz snapshot carries the full lists of players, projectiles, pickups, movers and crates; clients create/remove their visual nodes from those lists (entities are always created by the server only). This avoids node-path races on map changes and reconnects.
+14. **Message for new joins during a match** (§5.3): not specified; clients get "Match in progress".
+15. **Reconnect window expiry on the client** (§5.5): when 60 s of retries fail, the client returns to the main menu with "Host left the game".
+16. **Subnet mask for the sweep** (§5.2): Godot cannot read interface netmasks without native code, so every private IPv4 interface is assumed to be a /24 (the usual home Wi-Fi / Android hotspot setup).
+17. **Discovery of incompatible hosts** (§5.2): hosts running another protocol version are not listed (the version check also happens on connect).

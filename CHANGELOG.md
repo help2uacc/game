@@ -29,3 +29,12 @@
 - Spawning rules (§7.5): 3 weapons at fight start, +1 every 8 s up to 6, items at 30 s then every 20 s up to 2, free-point rule, spawn weights.
 - Event system (`GameEvents`) driving VFX/SFX: pooled cube bursts, tracers, muzzle flash, explosions + shockwave ring, damage numbers, crate break, landing dust, jump-pad puff, screen shake.
 - Tests: 19 combat integration tests.
+
+## M4 — Networking
+- `NetManager`: ENet host/join (port 47820), handshake with protocol version check ("Version mismatch — update the app"), "Game is full", in-match joins refused except reconnecting tokens, 5 s connect timeout ("Could not connect"), host leave/close → "Host left the game", ping every 1 s, fast ENet timeouts.
+- Reconnect (§5.5): UUID v4 session token, `user://session.cfg`, 60 s slot window on the server, automatic retries every 2 s with "Reconnecting… (Xs)" overlay, REJOIN button, disconnect while alive = death with 5 s credit rule, rejoiners spectate until the next round, released slots keep greyed kills.
+- `LanDiscovery`: broadcast probe + /24 unicast sweep every 2 s, unicast replies, 6 s host expiry (JSON packets per §5.2).
+- `GameState` replicated roster: unique colours, names, ready, rounds 4–99, START conditions; lobby RPCs.
+- `MatchManager` RPC hub: 60 Hz unreliable_ordered inputs with latched presses + ack, 30 Hz packed snapshots (~0.6 KB for 8 players), batched reliable events, map load sync (`load_map` → `map_ready`, 10 s timeout), 100 ms interpolation buffer on clients.
+- Screens: main menu (animated background, name prompt, REJOIN), join (host list + manual IP), lobby (slots, colour picker, name, ready, rounds stepper with long-press, START, leave confirm), game screen (HUD, controls, menu/reconnect overlays), settings, match results.
+- `tools/net_smoke_test.sh`: automated localhost match with 1 host + N bot clients (debug-only args), including a simulated connection loss.

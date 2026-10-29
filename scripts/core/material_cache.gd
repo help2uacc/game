@@ -71,3 +71,9 @@ static func white() -> ShaderMaterial:
 
 static func ink() -> ShaderMaterial:
 	return _file("ink")
+
+
+static func clear() -> void:
+	_flat.clear()
+	_alpha.clear()
+	_files.clear()

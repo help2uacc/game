@@ -8,10 +8,10 @@ unchecked milestone. Run `tools/check.sh` after every change.
 - [x] M1 Assets
 - [x] M2 Local sandbox
 - [x] M3 Combat
-- [ ] M4 Networking
+- [x] M4 Networking
 - [ ] M5 Match flow
 - [ ] M6 UI & polish
 - [ ] M7 Android & performance
 
 ## Current state
-M3 done. Next: M4 (networking: NetManager, discovery, lobby, replication, reconnect).
+M4 done. Next: M5 (match flow polish, spectate, results, all 12 maps).
