@@ -99,3 +99,18 @@ static func spacer(h: float) -> Control:
 static func expand(c: Control) -> Control:
 	c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	return c
+
+
+## Safe-area insets (notches) in design pixels: (left, top, right, bottom).
+static func safe_insets(vp: Viewport) -> Vector4:
+	if not OS.has_feature("mobile"):
+		return Vector4.ZERO
+	var safe: Rect2i = DisplayServer.get_display_safe_area()
+	var win: Vector2i = DisplayServer.window_get_size()
+	if win.x <= 0 or win.y <= 0 or safe.size.x <= 0:
+		return Vector4.ZERO
+	var size: Vector2 = vp.get_visible_rect().size
+	var sx: float = size.x / float(win.x)
+	var sy: float = size.y / float(win.y)
+	return Vector4(float(safe.position.x) * sx, float(safe.position.y) * sy,
+			float(win.x - safe.end.x) * sx, float(win.y - safe.end.y) * sy)

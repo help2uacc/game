@@ -53,6 +53,8 @@ func _ready() -> void:
 	MatchManager.round_finished.connect(_on_round_finished)
 	NetManager.reconnect_status.connect(_on_reconnect_status)
 	NetManager.reconnected.connect(_on_reconnected)
+	# Keep the screen on while in a match (§2).
+	DisplayServer.screen_set_keep_on(true)
 	if DebugBot.enabled():
 		_bot = DebugBot.new()
 	if sandbox:
@@ -76,6 +78,10 @@ func _start_sandbox() -> void:
 	world.start_fight()
 	hud.attach(world, true)
 	AudioManager.play_music("battle_loop_a")
+
+
+func _exit_tree() -> void:
+	DisplayServer.screen_set_keep_on(false)
 
 
 func _new_world(is_authority: bool) -> void:

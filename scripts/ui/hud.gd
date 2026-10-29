@@ -323,10 +323,11 @@ func _rebuild_scoreboard() -> void:
 # ---------------------------------------------------------------- per frame
 func _layout_corners() -> void:
 	var vp: Vector2 = get_viewport_rect().size
-	_top_left.position = Vector2.ZERO
-	_top_center.position = Vector2(vp.x * 0.5, 0)
-	_top_right.position = Vector2(vp.x, 0)
-	_bottom_center.position = Vector2(vp.x * 0.5, vp.y)
+	var inset: Vector4 = UiKit.safe_insets(get_viewport())
+	_top_left.position = Vector2(inset.x, inset.y)
+	_top_center.position = Vector2(vp.x * 0.5, inset.y)
+	_top_right.position = Vector2(vp.x - inset.z, inset.y)
+	_bottom_center.position = Vector2(vp.x * 0.5, vp.y - inset.w)
 
 
 func _process(delta: float) -> void:
@@ -401,7 +402,7 @@ func _draw() -> void:
 	var lp: Player = world.local_player()
 	var s: float = Settings.hud_scale
 	if lp != null and Settings.hud_enabled("health"):
-		_draw_bars(lp, Vector2(140, 34) * s, s)
+		_draw_bars(lp, _top_left.position + Vector2(140, 34) * s, s)
 	if lp != null and lp.alive:
 		_draw_target_marker(lp)
 	if Settings.hud_enabled("offscreen"):

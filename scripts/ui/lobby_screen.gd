@@ -133,7 +133,9 @@ func _refresh() -> void:
 	_ready_btn.visible = not is_host
 	var me: Dictionary = GameState.get_player(GameState.local_pid)
 	_ready_btn.set_pressed_no_signal(bool(me.get("ready", false)))
-	_ready_btn.text = "READY ✓" if bool(me.get("ready", false)) else "READY"
+	var is_ready: bool = bool(me.get("ready", false))
+	_ready_btn.text = "READY!" if is_ready else "READY UP"
+	_ready_btn.modulate = Color("#8FD694").lerp(Color.WHITE, 0.3) if is_ready else Color.WHITE
 	_start_btn.visible = is_host
 	_start_btn.disabled = not GameState.can_start()
 
@@ -189,7 +191,7 @@ func _color_button(color: int, mine: int) -> Control:
 		b.add_theme_stylebox_override(st, sb)
 	b.add_theme_font_size_override("font_size", 22)
 	if owner_pid >= 0 and owner_pid != GameState.local_pid:
-		b.text = "🔒 " + GameState.player_name(owner_pid)
+		b.text = GameState.player_name(owner_pid)
 		b.disabled = true
 		b.add_theme_color_override("font_disabled_color", Palette.INK)
 	b.pressed.connect(func() -> void: GameState.request_color(color))

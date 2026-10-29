@@ -595,6 +595,14 @@ func _build_ui_theme() -> void:
 	t.set_color("font_pressed_color", "CheckButton", INK)
 	t.set_color("font_hover_pressed_color", "CheckButton", INK)
 	t.set_color("font_focus_color", "CheckButton", INK)
+	var empty := StyleBoxEmpty.new()
+	for st: String in ["normal", "hover", "pressed", "disabled", "focus", "hover_pressed"]:
+		t.set_stylebox(st, "CheckButton", empty)
+	if ResourceLoader.exists("res://assets/ui/icons/toggle_on.svg"):
+		t.set_icon("checked", "CheckButton", load("res://assets/ui/icons/toggle_on.svg"))
+		t.set_icon("unchecked", "CheckButton", load("res://assets/ui/icons/toggle_off.svg"))
+		t.set_icon("checked_disabled", "CheckButton", load("res://assets/ui/icons/toggle_on.svg"))
+		t.set_icon("unchecked_disabled", "CheckButton", load("res://assets/ui/icons/toggle_off.svg"))
 	var slider := StyleBoxFlat.new()
 	slider.bg_color = Color(INK, 0.15)
 	slider.set_corner_radius_all(8)

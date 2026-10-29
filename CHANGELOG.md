@@ -44,3 +44,8 @@
 - Match flow on the server: shuffled map rotation (no repeat across reshuffles), load sync, 3 s countdown (frozen), 300 s fight, end at ≤1 alive or timer, round winner / DRAW, round wins, 6 s Round Results overlay with progress bar, Match Results (podium, jumping winner, confetti, table, BACK TO LOBBY / LEAVE), early match end when < 2 players remain after reconnect windows.
 - Spectate mode for dead players (camera follows a living player, ◀ ▶ buttons and swipe, "SPECTATING: name").
 - HUD corner layout fix; tests: 12-map parse/validate/symmetry/hazard/build tests.
+
+## M6 — UI & polish
+- Settings screen/overlay (name, Master/Music/SFX, joystick sensitivity, vibration, Low/Medium/High quality, HUD element toggles, HUD scale, reset), persisted to `user://settings.cfg`, toggle switch icons.
+- Full HUD: HP + armor bar, weapon icon + ammo, ROUND x / y, timer (red in last 30 s, ticks in last 10 s), alive counter, top-3 scoreboard (+ local), kill feed (4 entries, 5 s, hazard icon), off-screen enemy arrows, ping, FPS (off by default), damage numbers, 3-2-1-FIGHT!, auto-aim target brackets, safe-area aware corners, HUD scale.
+- Toasts and overlays, footstep SFX, keep-screen-on only during matches, lobby ready button states, quality presets wired (render scale, particles, decorations, parallax, remote blob shadows).

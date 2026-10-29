@@ -5,16 +5,16 @@
 [ext_resource type="Material" path="res://assets/materials/white.tres" id="3_o6ce1"]
 [ext_resource type="Material" path="res://assets/materials/blob_shadow.tres" id="4_vn1vp"]
 
-[sub_resource type="BoxMesh" id="BoxMesh_jhlp1"]
+[sub_resource type="BoxMesh" id="BoxMesh_4ongm"]
 size = Vector3(0.14, 0.55, 0.14)
 
-[sub_resource type="BoxMesh" id="BoxMesh_k5xcg"]
+[sub_resource type="BoxMesh" id="BoxMesh_7xu7w"]
 size = Vector3(0.18, 0.6, 0.18)
 
-[sub_resource type="BoxMesh" id="BoxMesh_n573r"]
+[sub_resource type="BoxMesh" id="BoxMesh_o6ce1"]
 size = Vector3(0.5, 0.5, 0.5)
 
-[sub_resource type="ArrayMesh" id="ArrayMesh_j0bfc"]
+[sub_resource type="ArrayMesh" id="ArrayMesh_vn1vp"]
 _surfaces = [{
 "aabb": AABB(-0.15, 0, 0.23, 0.3, 0.08, 0.040000007),
 "attribute_data": PackedByteArray("OjVQ/wAAAAAAAAAAOjVQ/wAAgD8AAIA/OjVQ/wAAgD8AAAAAOjVQ/wAAAAAAAAAAOjVQ/wAAAAAAAIA/OjVQ/wAAgD8AAIA/OjVQ/wAAAAAAAAAAOjVQ/wAAgD8AAIA/OjVQ/wAAgD8AAAAAOjVQ/wAAAAAAAAAAOjVQ/wAAAAAAAIA/OjVQ/wAAgD8AAIA/OjVQ/wAAAAAAAAAAOjVQ/wAAgD8AAIA/OjVQ/wAAgD8AAAAAOjVQ/wAAAAAAAAAAOjVQ/wAAAAAAAIA/OjVQ/wAAgD8AAIA/OjVQ/wAAAAAAAAAAOjVQ/wAAgD8AAIA/OjVQ/wAAgD8AAAAAOjVQ/wAAAAAAAAAAOjVQ/wAAAAAAAIA/OjVQ/wAAgD8AAIA/OjVQ/wAAAAAAAAAAOjVQ/wAAgD8AAIA/OjVQ/wAAgD8AAAAAOjVQ/wAAAAAAAAAAOjVQ/wAAAAAAAIA/OjVQ/wAAgD8AAIA/OjVQ/wAAAAAAAAAAOjVQ/wAAgD8AAIA/OjVQ/wAAgD8AAAAAOjVQ/wAAAAAAAAAAOjVQ/wAAAAAAAIA/OjVQ/wAAgD8AAIA/OjVQ/wAAAAAAAAAAOjVQ/wAAgD8AAIA/OjVQ/wAAgD8AAAAAOjVQ/wAAAAAAAAAAOjVQ/wAAAAAAAIA/OjVQ/wAAgD8AAIA/OjVQ/wAAAAAAAAAAOjVQ/wAAgD8AAIA/OjVQ/wAAgD8AAAAAOjVQ/wAAAAAAAAAAOjVQ/wAAAAAAAIA/OjVQ/wAAgD8AAIA/OjVQ/wAAAAAAAAAAOjVQ/wAAgD8AAIA/OjVQ/wAAgD8AAAAAOjVQ/wAAAAAAAAAAOjVQ/wAAAAAAAIA/OjVQ/wAAgD8AAIA/OjVQ/wAAAAAAAAAAOjVQ/wAAgD8AAIA/OjVQ/wAAgD8AAAAAOjVQ/wAAAAAAAAAAOjVQ/wAAAAAAAIA/OjVQ/wAAgD8AAIA/OjVQ/wAAAAAAAAAAOjVQ/wAAgD8AAIA/OjVQ/wAAgD8AAAAAOjVQ/wAAAAAAAAAAOjVQ/wAAAAAAAIA/OjVQ/wAAgD8AAIA/OjVQ/wAAAAAAAAAAOjVQ/wAAgD8AAIA/OjVQ/wAAgD8AAAAAOjVQ/wAAAAAAAAAAOjVQ/wAAAAAAAIA/OjVQ/wAAgD8AAIA/"),
@@ -26,76 +26,76 @@ _surfaces = [{
 "vertex_data": PackedByteArray("KVyPvQAAAABxPYo+KVyPvQrXoz0fhWs+KVyPvQAAAAAfhWs+KVyPvQAAAABxPYo+KVyPvQrXoz1xPYo+KVyPvQrXoz0fhWs+mpkZvgAAAAAfhWs+mpkZvgrXoz1xPYo+mpkZvgAAAABxPYo+mpkZvgAAAAAfhWs+mpkZvgrXoz0fhWs+mpkZvgrXoz1xPYo+mpkZvgrXoz1xPYo+KVyPvQrXoz0fhWs+KVyPvQrXoz1xPYo+mpkZvgrXoz1xPYo+mpkZvgrXoz0fhWs+KVyPvQrXoz0fhWs+mpkZvgAAAAAfhWs+KVyPvQAAAABxPYo+KVyPvQAAAAAfhWs+mpkZvgAAAAAfhWs+mpkZvgAAAABxPYo+KVyPvQAAAABxPYo+mpkZvgAAAABxPYo+KVyPvQrXoz1xPYo+KVyPvQAAAABxPYo+mpkZvgAAAABxPYo+mpkZvgrXoz1xPYo+KVyPvQrXoz1xPYo+KVyPvQAAAAAfhWs+mpkZvgrXoz0fhWs+mpkZvgAAAAAfhWs+KVyPvQAAAAAfhWs+KVyPvQrXoz0fhWs+mpkZvgrXoz0fhWs+mpkZPgAAAABxPYo+mpkZPgrXoz0fhWs+mpkZPgAAAAAfhWs+mpkZPgAAAABxPYo+mpkZPgrXoz1xPYo+mpkZPgrXoz0fhWs+KVyPPQAAAAAfhWs+KVyPPQrXoz1xPYo+KVyPPQAAAABxPYo+KVyPPQAAAAAfhWs+KVyPPQrXoz0fhWs+KVyPPQrXoz1xPYo+KVyPPQrXoz1xPYo+mpkZPgrXoz0fhWs+mpkZPgrXoz1xPYo+KVyPPQrXoz1xPYo+KVyPPQrXoz0fhWs+mpkZPgrXoz0fhWs+KVyPPQAAAAAfhWs+mpkZPgAAAABxPYo+mpkZPgAAAAAfhWs+KVyPPQAAAAAfhWs+KVyPPQAAAABxPYo+mpkZPgAAAABxPYo+KVyPPQAAAABxPYo+mpkZPgrXoz1xPYo+mpkZPgAAAABxPYo+KVyPPQAAAABxPYo+KVyPPQrXoz1xPYo+mpkZPgrXoz1xPYo+mpkZPgAAAAAfhWs+KVyPPQrXoz0fhWs+KVyPPQAAAAAfhWs+mpkZPgAAAAAfhWs+mpkZPgrXoz0fhWs+KVyPPQrXoz0fhWs+////f/9//7////9//3//v////3//f/+/////f/9//7////9//3//v////3//f/+/AAD/f/9//78AAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//vwAA/3//f/+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//3//f/9/AID/f/9//38AgP9//3//fwCA/3//f/9/AID/f/9//38AgP9//3//fwCA//////9/AID//////38AgP//////fwCA//////9/AID//////38AgP//////fwCA////f/9//7////9//3//v////3//f/+/////f/9//7////9//3//v////3//f/+/AAD/f/9//78AAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//vwAA/3//f/+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//3//f/9/AID/f/9//38AgP9//3//fwCA/3//f/9/AID/f/9//38AgP9//3//fwCA//////9/AID//////38AgP//////fwCA//////9/AID//////38AgP//////fwCA")
 }]
 
-[sub_resource type="BoxMesh" id="BoxMesh_nikkc"]
+[sub_resource type="BoxMesh" id="BoxMesh_jhlp1"]
 size = Vector3(0.12, 0.45, 0.12)
 
-[sub_resource type="PrismMesh" id="PrismMesh_ukl7e"]
+[sub_resource type="PrismMesh" id="PrismMesh_k5xcg"]
 size = Vector3(0.22, 0.16, 0.05)
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_y5vp1"]
+[sub_resource type="PlaneMesh" id="PlaneMesh_n573r"]
 size = Vector2(0.9, 0.9)
 
-[node name="Stickman" type="Node3D" unique_id=1767276876]
+[node name="Stickman" type="Node3D" unique_id=1023803820]
 script = ExtResource("1_4ongm")
 
-[node name="Flip" type="Node3D" parent="." unique_id=1035744394]
+[node name="Flip" type="Node3D" parent="." unique_id=574943649]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 
-[node name="Body" type="Node3D" parent="Flip" unique_id=1503106463]
+[node name="Body" type="Node3D" parent="Flip" unique_id=1587002669]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.9, 0)
 
-[node name="LegFront" type="Node3D" parent="Flip/Body" unique_id=1478409893]
+[node name="LegFront" type="Node3D" parent="Flip/Body" unique_id=76206106]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.08, 0.55, 0)
 
-[node name="Mesh" type="MeshInstance3D" parent="Flip/Body/LegFront" unique_id=2118170187]
+[node name="Mesh" type="MeshInstance3D" parent="Flip/Body/LegFront" unique_id=1960864454]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.275, 0)
 cast_shadow = 0
-mesh = SubResource("BoxMesh_jhlp1")
+mesh = SubResource("BoxMesh_4ongm")
 
-[node name="LegBack" type="Node3D" parent="Flip/Body" unique_id=716517165]
+[node name="LegBack" type="Node3D" parent="Flip/Body" unique_id=1844164693]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.08, 0.55, 0)
 
-[node name="Mesh" type="MeshInstance3D" parent="Flip/Body/LegBack" unique_id=1426861279]
+[node name="Mesh" type="MeshInstance3D" parent="Flip/Body/LegBack" unique_id=878572180]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.275, 0)
+cast_shadow = 0
+mesh = SubResource("BoxMesh_4ongm")
+
+[node name="Torso" type="MeshInstance3D" parent="Flip/Body" unique_id=786955847]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+cast_shadow = 0
+mesh = SubResource("BoxMesh_7xu7w")
+
+[node name="Head" type="MeshInstance3D" parent="Flip/Body" unique_id=1361775224]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, 0)
+cast_shadow = 0
+mesh = SubResource("BoxMesh_o6ce1")
+
+[node name="Eyes" type="MeshInstance3D" parent="Flip/Body/Head" unique_id=1649163055]
+cast_shadow = 0
+mesh = SubResource("ArrayMesh_vn1vp")
+
+[node name="ArmFront" type="Node3D" parent="Flip/Body" unique_id=1721950596]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15, 1.12, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Flip/Body/ArmFront" unique_id=895787045]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.225, 0)
 cast_shadow = 0
 mesh = SubResource("BoxMesh_jhlp1")
 
-[node name="Torso" type="MeshInstance3D" parent="Flip/Body" unique_id=1209722618]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
-cast_shadow = 0
-mesh = SubResource("BoxMesh_k5xcg")
-
-[node name="Head" type="MeshInstance3D" parent="Flip/Body" unique_id=635314859]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, 0)
-cast_shadow = 0
-mesh = SubResource("BoxMesh_n573r")
-
-[node name="Eyes" type="MeshInstance3D" parent="Flip/Body/Head" unique_id=1449278232]
-cast_shadow = 0
-mesh = SubResource("ArrayMesh_j0bfc")
-
-[node name="ArmFront" type="Node3D" parent="Flip/Body" unique_id=1141304572]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15, 1.12, 0)
-
-[node name="Mesh" type="MeshInstance3D" parent="Flip/Body/ArmFront" unique_id=503740268]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.225, 0)
-cast_shadow = 0
-mesh = SubResource("BoxMesh_nikkc")
-
-[node name="Hand" type="Marker3D" parent="Flip/Body/ArmFront" unique_id=1733991457]
+[node name="Hand" type="Marker3D" parent="Flip/Body/ArmFront" unique_id=532765021]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.42, 0)
 
-[node name="ArmBack" type="Node3D" parent="Flip/Body" unique_id=271170729]
+[node name="ArmBack" type="Node3D" parent="Flip/Body" unique_id=20183281]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 1.12, 0)
 
-[node name="Mesh" type="MeshInstance3D" parent="Flip/Body/ArmBack" unique_id=1582876880]
+[node name="Mesh" type="MeshInstance3D" parent="Flip/Body/ArmBack" unique_id=260637510]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.225, 0)
 cast_shadow = 0
-mesh = SubResource("BoxMesh_nikkc")
+mesh = SubResource("BoxMesh_jhlp1")
 
-[node name="WeaponHolder" type="Node3D" parent="." unique_id=104342498]
+[node name="WeaponHolder" type="Node3D" parent="." unique_id=1814057161]
 
-[node name="NameTag" type="Label3D" parent="." unique_id=186117691]
+[node name="NameTag" type="Label3D" parent="." unique_id=1263095807]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.05, 0)
 pixel_size = 0.006
 billboard = 1
@@ -108,13 +108,13 @@ text = "Player"
 font_size = 40
 outline_size = 14
 
-[node name="LocalMarker" type="MeshInstance3D" parent="NameTag" unique_id=902830751]
+[node name="LocalMarker" type="MeshInstance3D" parent="NameTag" unique_id=1958587158]
 transform = Transform3D(-1, 8.742278e-08, 0, -8.742278e-08, -1, 0, 0, 0, 1, 0, 0.26, 0)
 material_override = ExtResource("3_o6ce1")
 cast_shadow = 0
-mesh = SubResource("PrismMesh_ukl7e")
+mesh = SubResource("PrismMesh_k5xcg")
 
-[node name="BlobShadow" type="MeshInstance3D" parent="." unique_id=199129032]
+[node name="BlobShadow" type="MeshInstance3D" parent="." unique_id=291740897]
 material_override = ExtResource("4_vn1vp")
 cast_shadow = 0
-mesh = SubResource("PlaneMesh_y5vp1")
+mesh = SubResource("PlaneMesh_n573r")

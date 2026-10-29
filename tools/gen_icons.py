@@ -61,11 +61,26 @@ def svg(rects) -> str:
     return "\n".join(parts) + "\n"
 
 
+def toggle(on: bool) -> str:
+    """Pill-shaped switch for settings toggles (CheckButton icons)."""
+    track = "#FFD36E" if on else "#D6D3E0"
+    knob_x = 50 if on else 6
+    return (
+        '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="64" viewBox="0 0 96 52">\n'
+        f'<rect x="2" y="4" width="92" height="44" rx="22" fill="{track}"/>\n'
+        f'<rect x="{knob_x}" y="8" width="40" height="36" rx="18" fill="{WHITE}"/>\n'
+        f'<rect x="{knob_x + 14}" y="20" width="12" height="12" rx="3" fill="{INK}"/>\n'
+        "</svg>\n"
+    )
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     for name, rects in ICONS.items():
         (OUT / f"{name}.svg").write_text(svg(rects), encoding="utf-8")
-    print(f"{len(ICONS)} icons written to {OUT}")
+    (OUT / "toggle_on.svg").write_text(toggle(True), encoding="utf-8")
+    (OUT / "toggle_off.svg").write_text(toggle(False), encoding="utf-8")
+    print(f"{len(ICONS) + 2} icons written to {OUT}")
 
 
 if __name__ == "__main__":

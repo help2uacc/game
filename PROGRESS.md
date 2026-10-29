@@ -10,8 +10,8 @@ unchecked milestone. Run `tools/check.sh` after every change.
 - [x] M3 Combat
 - [x] M4 Networking
 - [x] M5 Match flow
-- [ ] M6 UI & polish
+- [x] M6 UI & polish
 - [ ] M7 Android & performance
 
 ## Current state
-M5 done. Next: M6 (UI & polish pass: settings, HUD toggles, toasts, audio, shake, quality presets).
+M6 done. Next: M7 (Android build, performance pass, acceptance checklist, README).

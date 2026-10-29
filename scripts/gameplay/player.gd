@@ -42,6 +42,7 @@ var _wants_drop: bool = false
 var _was_grounded: bool = false
 
 var stickman: Stickman
+var _step_t: float = 0.0
 
 
 func _init() -> void:
@@ -206,5 +207,13 @@ func update_visuals(delta: float) -> void:
 	stickman.set_aim(aim_angle)
 	stickman.set_weapon(weapon_id)
 	stickman.set_motion(grounded, Vector2(velocity.x, velocity.y))
+	# Footsteps while running on the ground.
+	if grounded and absf(velocity.x) > 1.0:
+		_step_t -= delta
+		if _step_t <= 0.0:
+			_step_t = 0.28
+			AudioManager.play_at("footstep", global_position, randf_range(0.9, 1.15), -10.0)
+	else:
+		_step_t = 0.0
 	if weapon_id == 0:
 		aim_angle = move_toward(aim_angle, 0.0, delta * 4.0)
