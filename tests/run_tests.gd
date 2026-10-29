@@ -54,4 +54,12 @@ func _run() -> void:
 				for msg: String in inst.failures:
 					printerr("  FAIL %s" % msg)
 	print("Tests: %d run, %d failed" % [total, failed])
+	# Release static caches / audio so nothing is reported as leaked at exit.
+	MaterialCache.clear()
+	WeaponDB.clear()
+	var audio: Node = root.get_node_or_null("AudioManager")
+	if audio != null:
+		audio.call("release_all")
+	# Let the audio server retire stopped playbacks before exiting.
+	await create_timer(0.25).timeout
 	quit(1 if failed > 0 else 0)

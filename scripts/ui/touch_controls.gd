@@ -1,24 +1,31 @@
 class_name TouchControls
 extends Control
-## Touch controls (PRD §8): floating joystick on the left half, Attack, Jump,
+## Touch controls (PRD §8): floating joystick on the left half, Attack,
 ## Pick Up, Throw on the right; multi-touch. v1.1: bigger buttons and manual
 ## aim — press Attack to fire, drag from it to aim (release = stop).
+## v1.2: no Jump button — push the joystick up to jump (push up again in the
+## air for the double jump, hold up to keep hopping); hold it down on a
+## one-way platform to drop through. The joystick base is always visible.
 ## Debug keyboard controls on desktop (A/D move, S down, Space jump, J attack,
 ## K pick up, L throw); on desktop the mouse pointer aims.
 
 
 const JOYSTICK_RADIUS := 110.0
 const ATTACK_SIZE := 230.0
-const JUMP_SIZE := 190.0
 const PICKUP_SIZE := 170.0
-const THROW_SIZE := 150.0
+const THROW_SIZE := 160.0
+## Joystick y (screen, -1 = up) that triggers a jump; re-armed below JUMP_REARM.
+const JUMP_ZONE := -0.6
+const JUMP_REARM := -0.35
+const ATTACK_COLOR := Color("#FF8FA3")
+const PICKUP_COLOR := Color("#FFD36E")
+const THROW_COLOR := Color("#8EC9FF")
 ## Drag distance (design px) from the Attack centre for a full aim vector.
 const AIM_RADIUS := 150.0
 const AIM_DEADZONE := 0.18
 const ICON_DIR := "res://assets/ui/icons/"
 
 var attack_btn: TouchButton
-var jump_btn: TouchButton
 var pickup_btn: TouchButton
 var throw_btn: TouchButton
 
@@ -34,25 +41,26 @@ var _enabled: bool = true
 var _weapon_icon_key: String = ""
 var _aim_pos: Vector2 = Vector2.ZERO
 var _aim_vec: Vector2 = Vector2.ZERO
+var _jump_armed: bool = true
+var _joy_home: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_keyboard = not OS.has_feature("mobile")
-	attack_btn = _make_button(ATTACK_SIZE, "attack")
-	jump_btn = _make_button(JUMP_SIZE, "jump")
-	pickup_btn = _make_button(PICKUP_SIZE, "pickup")
-	throw_btn = _make_button(THROW_SIZE, "throw")
+	attack_btn = _make_button(ATTACK_SIZE, "attack", ATTACK_COLOR, "")
+	pickup_btn = _make_button(PICKUP_SIZE, "pickup", PICKUP_COLOR, "PICK UP")
+	throw_btn = _make_button(THROW_SIZE, "throw", THROW_COLOR, "THROW")
 	pickup_btn.visible = false
 	throw_btn.visible = false
 	resized.connect(_layout)
 	_layout()
 
 
-func _make_button(s: float, icon_name: String) -> TouchButton:
+func _make_button(s: float, icon_name: String, color: Color, caption: String) -> TouchButton:
 	var b := TouchButton.new()
-	b.setup(s, load(ICON_DIR + icon_name + ".svg"))
+	b.setup(s, load(ICON_DIR + icon_name + ".svg"), color, caption)
 	add_child(b)
 	return b
 
@@ -62,24 +70,22 @@ func _layout() -> void:
 	var r: Rect2 = _safe_rect()
 	var right: float = r.end.x
 	var bottom: float = r.end.y
-	jump_btn.position = Vector2(right - JUMP_SIZE, bottom - JUMP_SIZE)
-	attack_btn.position = Vector2(right - 460, bottom - 340)
-	pickup_btn.position = Vector2(right - 430, bottom - 540)
-	throw_btn.position = Vector2(right - 640, bottom - 250)
+	attack_btn.position = Vector2(right - ATTACK_SIZE - 30, bottom - ATTACK_SIZE - 30)
+	pickup_btn.position = Vector2(right - PICKUP_SIZE - 60, bottom - ATTACK_SIZE - PICKUP_SIZE - 70)
+	throw_btn.position = Vector2(right - ATTACK_SIZE - THROW_SIZE - 80, bottom - THROW_SIZE - 20)
+	_joy_home = Vector2(r.position.x + JOYSTICK_RADIUS + 70, bottom - JOYSTICK_RADIUS - 60)
+	queue_redraw()
 
 
+## Visible area minus notches. Uses UiKit.safe_insets, which ignores bogus
+## safe-area values (some older Android versions report the portrait rect).
 func _safe_rect() -> Rect2:
 	var vp: Rect2 = get_viewport_rect()
 	var margin := Vector2(24, 24)
-	if OS.has_feature("mobile"):
-		var safe: Rect2i = DisplayServer.get_display_safe_area()
-		var win: Vector2i = DisplayServer.window_get_size()
-		if win.x > 0 and safe.size.x > 0:
-			var sx: float = vp.size.x / float(win.x)
-			var left: float = float(safe.position.x) * sx
-			var right_inset: float = float(win.x - safe.end.x) * sx
-			return Rect2(Vector2(left, 0) + margin, vp.size - Vector2(left + right_inset, 0) - margin * 2.0)
-	return Rect2(margin, vp.size - margin * 2.0)
+	var inset: Vector4 = UiKit.safe_insets(get_viewport())
+	var pos := Vector2(inset.x, inset.y) + margin
+	var end: Vector2 = vp.size - Vector2(inset.z, inset.w) - margin
+	return Rect2(pos, end - pos)
 
 
 func set_enabled(on: bool) -> void:
@@ -93,7 +99,7 @@ func _release_all() -> void:
 	_joy_index = -1
 	_joy_vec = Vector2.ZERO
 	_aim_vec = Vector2.ZERO
-	for b: TouchButton in [attack_btn, jump_btn, pickup_btn, throw_btn]:
+	for b: TouchButton in [attack_btn, pickup_btn, throw_btn]:
 		b.touch_index = -1
 		b.set_pressed(false)
 	queue_redraw()
@@ -137,21 +143,19 @@ func _input(event: InputEvent) -> void:
 
 
 func _touch_down(index: int, pos: Vector2) -> void:
-	for b: TouchButton in [pickup_btn, throw_btn, jump_btn, attack_btn]:
+	for b: TouchButton in [pickup_btn, throw_btn, attack_btn]:
 		if b.touch_index == -1 and b.hit(pos):
 			b.touch_index = index
 			b.set_pressed(true)
 			if b == attack_btn:
 				_aim_pos = pos
 				_update_aim()
-			if b == jump_btn:
-				_jump_latch = true
-			elif b == pickup_btn:
+			if b == pickup_btn:
 				_pickup_latch = true
 			elif b == throw_btn:
 				_throw_latch = true
 			return
-	if _joy_index == -1 and pos.x < get_viewport_rect().size.x * 0.5 and pos.y > 150.0:
+	if _joy_index == -1 and pos.x < get_viewport_rect().size.x * 0.5 and pos.y > 170.0:
 		_joy_index = index
 		_joy_origin = pos
 		_joy_pos = pos
@@ -162,8 +166,9 @@ func _touch_up(index: int) -> void:
 	if index == _joy_index:
 		_joy_index = -1
 		_joy_vec = Vector2.ZERO
+		_jump_armed = true
 		queue_redraw()
-	for b: TouchButton in [pickup_btn, throw_btn, jump_btn, attack_btn]:
+	for b: TouchButton in [pickup_btn, throw_btn, attack_btn]:
 		if b.touch_index == index:
 			b.touch_index = -1
 			b.set_pressed(false)
@@ -191,6 +196,12 @@ func _update_joy() -> void:
 	if d.length() > JOYSTICK_RADIUS:
 		d = d.normalized() * JOYSTICK_RADIUS
 	_joy_vec = d / JOYSTICK_RADIUS
+	# Pushing up into the jump zone jumps; leaving it re-arms (double jump).
+	if _joy_vec.y <= JUMP_ZONE and _jump_armed:
+		_jump_latch = true
+		_jump_armed = false
+	elif _joy_vec.y > JUMP_REARM:
+		_jump_armed = true
 	queue_redraw()
 
 
@@ -215,7 +226,7 @@ func read_input(target: PlayerInput) -> void:
 	var mx: float = clampf(_joy_vec.x * sens, -1.0, 1.0)
 	var down: bool = _joy_vec.y * sens > GameConfig.DROP_DOWN_THRESHOLD
 	var attack: bool = attack_btn.is_pressed
-	var jump_held: bool = jump_btn.is_pressed
+	var jump_held: bool = _joy_index != -1 and _joy_vec.y <= JUMP_ZONE
 	if _keyboard and _enabled:
 		var kx: float = 0.0
 		if Input.is_physical_key_pressed(KEY_A) or Input.is_physical_key_pressed(KEY_LEFT):
@@ -250,14 +261,32 @@ func ack_presses(jump: bool, pickup: bool, throw: bool) -> void:
 
 
 func _draw() -> void:
+	# Attack aim stick.
 	if attack_btn != null and attack_btn.is_pressed:
 		var c: Vector2 = attack_btn.position + attack_btn.size * 0.5
-		draw_arc(c, AIM_RADIUS, 0, TAU, 48, Color(1, 1, 1, 0.35), 4.0)
+		draw_arc(c, AIM_RADIUS, 0, TAU, 64, Color(Palette.INK, 0.25), 10.0, true)
+		draw_arc(c, AIM_RADIUS, 0, TAU, 64, Color(1, 1, 1, 0.75), 4.0, true)
 		if _aim_vec != Vector2.ZERO:
-			draw_line(c, c + _aim_vec * AIM_RADIUS, Color(1, 1, 1, 0.6), 6.0)
-			draw_circle(c + _aim_vec * AIM_RADIUS, 34.0, Color(1, 1, 1, 0.7))
-	if _joy_index == -1:
-		return
-	draw_circle(_joy_origin, JOYSTICK_RADIUS, Color(1, 1, 1, 0.18))
-	draw_arc(_joy_origin, JOYSTICK_RADIUS, 0, TAU, 48, Color(1, 1, 1, 0.45), 4.0)
-	draw_circle(_joy_origin + _joy_vec * JOYSTICK_RADIUS, 48.0, Color(1, 1, 1, 0.55))
+			var tip: Vector2 = c + _aim_vec * AIM_RADIUS
+			draw_line(c, tip, Color(ATTACK_COLOR, 0.8), 8.0, true)
+			draw_circle(tip + Vector2(0, 4), 36.0, Color(Palette.INK, 0.25), true, -1.0, true)
+			draw_circle(tip, 36.0, Color(1, 1, 1, 0.95), true, -1.0, true)
+			draw_circle(tip, 26.0, ATTACK_COLOR, true, -1.0, true)
+	# Joystick: always visible (ghost at its home spot when not touched).
+	var active: bool = _joy_index != -1
+	var origin: Vector2 = _joy_origin if active else _joy_home
+	var a: float = 1.0 if active else 0.6
+	draw_circle(origin + Vector2(0, 6), JOYSTICK_RADIUS, Color(Palette.INK, 0.18 * a), true, -1.0, true)
+	draw_circle(origin, JOYSTICK_RADIUS, Color(1, 1, 1, 0.22 * a), true, -1.0, true)
+	draw_arc(origin, JOYSTICK_RADIUS, 0, TAU, 64, Color(1, 1, 1, 0.85 * a), 6.0, true)
+	# Jump zone at the top of the ring.
+	var in_zone: bool = active and _joy_vec.y <= JUMP_ZONE
+	draw_arc(origin, JOYSTICK_RADIUS - 2.0, -PI * 0.5 - 0.55, -PI * 0.5 + 0.55, 24,
+			Color(Palette.GOLD, (0.95 if in_zone else 0.7) * a), 12.0, true)
+	var chev: Vector2 = origin + Vector2(0, -JOYSTICK_RADIUS * 0.62)
+	draw_polyline(PackedVector2Array([chev + Vector2(-18, 10), chev, chev + Vector2(18, 10)]), Color(1, 1, 1, 0.9 * a), 6.0, true)
+	var knob: Vector2 = origin + _joy_vec * JOYSTICK_RADIUS
+	draw_circle(knob + Vector2(0, 5), 50.0, Color(Palette.INK, 0.25 * a), true, -1.0, true)
+	draw_circle(knob, 50.0, Color(1, 1, 1, 0.95 * a), true, -1.0, true)
+	draw_circle(knob, 38.0, Color(Palette.ARMOR if not in_zone else Palette.GOLD, 0.9 * a), true, -1.0, true)
+	draw_circle(knob - Vector2(0, 12), 20.0, Color(1, 1, 1, 0.3 * a), true, -1.0, true)

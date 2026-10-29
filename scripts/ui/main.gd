@@ -96,6 +96,7 @@ func _notification(what: int) -> void:
 
 
 func _exit_tree() -> void:
+	AudioManager.release_all()
 	MaterialCache.clear()
 	WeaponDB.clear()
 

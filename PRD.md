@@ -1,6 +1,6 @@
 # PRD — Block Brawl
 
-> **Status:** v1.1 — owner change requests applied (see §19)
+> **Status:** v1.2 — owner change requests applied (see §19, §20)
 > **Owner:** Joe
 > **Implementer:** Claude Code (cloud), working against the project GitHub repository
 > **Platform:** Android only · Landscape · Local network multiplayer (Wi-Fi / Hotspot)
@@ -222,7 +222,7 @@ All poses blend smoothly (v1.1): limbs ease toward their target pose, facing cha
 | Double-jump velocity | 10 m/s (one per airtime, resets on landing) |
 | Coyote time | 0.10 s |
 | Jump buffer | 0.10 s |
-| Drop through one-way platform | hold joystick down + press Jump |
+| Drop through one-way platform | hold the joystick down for 0.15 s (or down + jump on keyboard) — v1.2 |
 | Movement plane | X (horizontal) and Y (vertical) only; Z locked at 0 |
 
 - Implementation: `CharacterBody3D` with Z axis locked.
@@ -300,16 +300,15 @@ Minimal, fixed layout, clean and semi-transparent (not customisable in v1, but j
 
 | Control | Position | Behaviour |
 |---|---|---|
-| **Joystick** | Left half of the screen, **floating**: appears where the thumb touches. Radius 110 px (design res). | Horizontal axis → move. Pushing down (y > 0.6) + Jump → drop through one-way platform. |
+| **Joystick** | Left half of the screen, **floating**: centres where the thumb touches; a ghost of it is always shown bottom-left (v1.2). Radius 110 px (design res). | Horizontal axis → move. **Push up (y < −0.6) → jump** (push up again in the air → double jump; hold up → keep hopping). Hold down (y > 0.6) for 0.15 s → drop through a one-way platform. (v1.2) |
 | **Attack** | Right side, largest button (230 px, v1.1) | Shoot (held = auto-fire) / punch when unarmed; drag from it to aim (§7.2). Icon changes to the current weapon. |
-| **Jump** | Right side, bottom-right corner (190 px, v1.1) | Jump / double jump. |
 | **Pick Up** | Right side, above Attack (170 px, v1.1) | **Visible only** when overlapping a weapon pickup. |
 | **Throw** | Right side, left of Attack (150 px, v1.1) | **Visible only** when holding a weapon. |
 | **Menu** (☰) | Top-left button (120 px, v1.1) | Opens in-match overlay: Resume, Settings, Leave (confirm). The game is **not paused** (multiplayer). |
 | **Spectate ◀ ▶** | Bottom centre, visible only when spectating | Cycle followed player. |
 
 - Multi-touch: joystick and buttons must work simultaneously.
-- Buttons: white rounded squares at 35 % opacity with a simple icon; pressed state 70 % opacity + scale 0.92.
+- Buttons (v1.2 restyle): round, pastel accent fill (Attack pink, Pick Up gold, Throw blue) with a white rim, soft shadow, top highlight, icon and caption; pressed state = deeper fill + glow ring + scale 0.92. Controls respect the safe area but ignore implausible safe-area values (older Android) so they are always on-screen.
 - Android **Back** button = opens the in-match overlay (in match) or goes back one screen (menus).
 
 **Debug keyboard controls (editor/desktop only):** A/D move, S down, Space jump, J attack, K pick up, L throw, Esc menu.
@@ -674,3 +673,10 @@ Internet play, host migration, bots, chat/emotes, accounts, stored stats/leaderb
 5. **No hits through cover**: shots, projectiles and splash are blocked by floors, blocks, crates, movers and one-way platforms (§7.1).
 6. **Melee combo**: 2 punches within 3 s disarm the victim and stun them for 1 s (§7.1).
 7. **Smoother animation, movement and shooting**: blended poses, eased turning, smoothed weapon aim with recoil kick, fading tracers (§6.3, §7.3).
+
+## 20. Change requests v1.2 (owner)
+
+1. **No Jump button**: push the joystick up to jump / double jump; hold up to keep hopping; hold down to drop through one-way platforms (§6.4, §8).
+2. **Sandbox restarts** 1.6 s after the local player dies.
+3. **Restyled action buttons** (round, coloured, captions) and an always-visible joystick (§8).
+4. **Android 8 controls fix**: controls no longer depend on a valid safe area; they are always drawn within the screen (§8).

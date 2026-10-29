@@ -65,3 +65,10 @@
 - Melee combo: 2 punches within 3 s disarm (weapon drops with ammo) and stun for 1 s (wobble + orbiting stars, replicated in snapshots).
 - Smoother visuals: blended limb poses, eased facing turn, smoothed weapon aim + recoil kick, take-off stretch, fading tracers.
 - PRD updated (§19); tests for manual aim, cover, melee combo and spawn telegraph (75 tests).
+
+## v1.2.0 — Owner change requests
+- Jump button removed: push the joystick up to jump (re-push for double jump, hold to keep hopping); hold down on a one-way platform to drop through.
+- Sandbox restarts automatically 1.6 s after the local player dies.
+- Restyled round action buttons (pink Attack, gold Pick Up, blue Throw) with rim, shadow, highlight and captions; nicer aim stick and joystick; joystick ghost always visible.
+- Android controls fix: safe-area insets are validated and clamped (some Android versions report a portrait/empty safe area in landscape, which could push controls off-screen); low-contrast 35 % white buttons replaced by opaque coloured ones.
+- Test runner releases audio/static caches before exit; tests for joystick jump, hold-to-hop, hold-down drop and sandbox restart (80 tests).

@@ -192,11 +192,24 @@ func _mouse_aim(lp: Player) -> void:
 	_local_input.aim_y = -d.y
 
 
-func _process(_delta: float) -> void:
+## v1.2: in the sandbox, dying restarts it after the death animation.
+const SANDBOX_RESTART_DELAY := 1.6
+var _sandbox_restart_t: float = -1.0
+
+
+func _process(delta: float) -> void:
 	if world == null:
 		return
 	var lp: Player = world.local_player()
 	var spectating: bool = lp == null or not lp.alive
+	if sandbox and lp != null and not lp.alive:
+		if _sandbox_restart_t < 0.0:
+			_sandbox_restart_t = SANDBOX_RESTART_DELAY
+		_sandbox_restart_t -= delta
+		if _sandbox_restart_t <= 0.0:
+			_sandbox_restart_t = -1.0
+			_start_sandbox()
+			return
 	controls.set_enabled(not spectating and not _menu.visible)
 	if spectating and not sandbox:
 		_update_spectate()

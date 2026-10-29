@@ -26,8 +26,12 @@ is generated in this repository. The full specification is in `PRD.md`.
      playground with two training dummies on Candy Plains
      (`scenes/main/sandbox.tscn` can also be run directly with **F6**).
 
-Desktop debug controls: **A/D** move, **S** down, **Space** jump (hold S +
-Space to drop through a one-way platform), **J** attack, **K** pick up,
+Touch: left joystick moves — **push up to jump** (again in the air for a
+double jump), hold down to drop through a one-way platform; Attack (drag to
+aim), Pick Up and Throw on the right. Dying in the sandbox restarts it.
+
+Desktop debug controls: **A/D** move, **S** down (hold to drop through a
+one-way platform), **Space** jump, **J** attack, **K** pick up,
 **L** throw, **mouse** aims, **Esc** menu/back, **F3** debug overlay (FPS, draw calls, ping,
 snapshot size). Mouse clicks emulate touches, so the on-screen joystick and
 buttons can be tried with the mouse (on phones: drag from the Attack button

@@ -43,6 +43,9 @@ var _prev_jump_pressed: bool = false
 var _prev_pickup_pressed: bool = false
 var _prev_throw_pressed: bool = false
 var _wants_drop: bool = false
+var _down_hold_t: float = 0.0
+## v1.2: holding down this long on a one-way platform drops through it.
+const DROP_HOLD_TIME := 0.15
 var _was_grounded: bool = false
 
 var stickman: Stickman
@@ -150,6 +153,19 @@ func simulate_movement(inp: PlayerInput, jump_edge: bool, delta: float, map: Gam
 	if jump_edge:
 		jump_buffer_t = GameConfig.JUMP_BUFFER
 		_wants_drop = inp.down
+	elif inp.jump_held and grounded and jump_buffer_t <= 0.0:
+		# v1.2: holding the joystick up keeps hopping.
+		jump_buffer_t = GameConfig.JUMP_BUFFER
+		_wants_drop = false
+	# v1.2: holding down on a one-way platform drops through it.
+	if inp.down and on_platform and absf(inp.move_x) < 0.9:
+		_down_hold_t += delta
+		if _down_hold_t >= DROP_HOLD_TIME:
+			_down_hold_t = 0.0
+			jump_buffer_t = GameConfig.JUMP_BUFFER
+			_wants_drop = true
+	else:
+		_down_hold_t = 0.0
 	# Horizontal: accelerate toward input; reduced control while knocked back.
 	var target_x: float = clampf(inp.move_x, -1.0, 1.0) * GameConfig.RUN_SPEED
 	if is_knocked():

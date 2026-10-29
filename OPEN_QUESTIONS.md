@@ -24,3 +24,5 @@ consistent with the PRD was implemented.
 19. **v1.1 melee combo window**: "2 times hit by melee" has no time limit; implemented as 2 punches within 3 s (counter resets after the stun or when the window passes).
 20. **v1.1 spawn telegraph length**: 1.5 s glow before each weapon *and* item spawn (items too, for consistency).
 21. **v1.1 touch aiming scheme**: aim by dragging from the Attack button (press = fire, drag = aim); desktop aims with the mouse.
+22. **v1.2 Android 8 "cannot see controllers"**: could not be reproduced without the device. Fixed the two plausible causes: (a) invalid safe-area values on older Android now ignored/clamped, (b) the 35 % white buttons and touch-only joystick were near-invisible on pastel maps — buttons are now opaque and coloured and the joystick is always shown. Please re-test on the phone.
+23. **v1.2 drop-through without a Jump button**: hold the joystick down for 0.15 s on a one-way platform (keyboard: S, or S + Space).

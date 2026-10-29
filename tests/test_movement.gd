@@ -139,3 +139,32 @@ func test_fall_off_map_kills() -> void:
 	assert_false(p.alive, "dead after falling")
 	assert_eq(deaths.size(), 1)
 	assert_eq(int(deaths[0][2]), GameConfig.Cause.FALL)
+
+
+func test_holding_jump_keeps_hopping() -> void:
+	var w: World = _world()
+	var p: Player = _spawn(w, Vector3(10.5, 2.2, 0))
+	await physics_frames(20)
+	var inp := PlayerInput.new()
+	inp.jump_held = true
+	w.set_input(1, inp)
+	var takeoffs: int = 0
+	var was_grounded: bool = true
+	for i: int in range(120):
+		await tree().physics_frame
+		if was_grounded and not p.grounded and p.velocity.y > 5.0:
+			takeoffs += 1
+		was_grounded = p.grounded
+	assert_true(takeoffs >= 2, "hopped repeatedly while held (%d)" % takeoffs)
+
+
+func test_hold_down_drops_through_platform() -> void:
+	var w: World = _world()
+	var p: Player = _spawn(w, Vector3(25.5, 5.2, 0))
+	await physics_frames(20)
+	assert_true(p.on_platform, "standing on the one-way platform")
+	var inp := PlayerInput.new()
+	inp.down = true
+	w.set_input(1, inp)
+	await physics_frames(50)
+	assert_near(p.global_position.y, 2.0, 0.08, "dropped by holding down")

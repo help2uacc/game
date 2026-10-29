@@ -159,3 +159,21 @@ func stop_music() -> void:
 func vibrate(ms: int) -> void:
 	if Settings.vibration and OS.has_feature("mobile"):
 		Input.vibrate_handheld(ms)
+
+
+## Stops everything and drops cached streams (shutdown / test cleanup).
+func release_all() -> void:
+	for p: AudioStreamPlayer in _pool_2d:
+		p.stop()
+		p.stream = null
+	for p3: AudioStreamPlayer3D in _pool_3d:
+		p3.stop()
+		p3.stream = null
+	for m: AudioStreamPlayer in [_music_a, _music_b]:
+		m.stop()
+		m.stream = null
+	if _music_tween != null:
+		_music_tween.kill()
+	_music_current = ""
+	_streams.clear()
+	_voice_name.clear()

@@ -102,15 +102,27 @@ static func expand(c: Control) -> Control:
 
 
 ## Safe-area insets (notches) in design pixels: (left, top, right, bottom).
+## Defensive (v1.2): some Android versions report an empty or portrait-oriented
+## safe area for a landscape window; such values are ignored and every inset
+## is clamped to 12 % of the screen so controls can never be pushed off-screen.
 static func safe_insets(vp: Viewport) -> Vector4:
 	if not OS.has_feature("mobile"):
 		return Vector4.ZERO
 	var safe: Rect2i = DisplayServer.get_display_safe_area()
 	var win: Vector2i = DisplayServer.window_get_size()
-	if win.x <= 0 or win.y <= 0 or safe.size.x <= 0:
+	if win.x <= 0 or win.y <= 0 or safe.size.x <= 0 or safe.size.y <= 0:
+		return Vector4.ZERO
+	if (safe.size.x > safe.size.y) != (win.x > win.y):
+		return Vector4.ZERO
+	if safe.size.x < int(win.x * 0.7) or safe.size.y < int(win.y * 0.7):
 		return Vector4.ZERO
 	var size: Vector2 = vp.get_visible_rect().size
 	var sx: float = size.x / float(win.x)
 	var sy: float = size.y / float(win.y)
-	return Vector4(float(safe.position.x) * sx, float(safe.position.y) * sy,
-			float(win.x - safe.end.x) * sx, float(win.y - safe.end.y) * sy)
+	var max_x: float = size.x * 0.12
+	var max_y: float = size.y * 0.12
+	return Vector4(
+		clampf(float(safe.position.x) * sx, 0.0, max_x),
+		clampf(float(safe.position.y) * sy, 0.0, max_y),
+		clampf(float(win.x - safe.end.x) * sx, 0.0, max_x),
+		clampf(float(win.y - safe.end.y) * sy, 0.0, max_y))
