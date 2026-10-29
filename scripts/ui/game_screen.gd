@@ -69,10 +69,16 @@ func _start_sandbox() -> void:
 				sandbox_map = a.trim_prefix("--map=")
 	world.load_map(sandbox_map)
 	world.add_player(1, 0, Settings.player_name if Settings.has_player_name() else "Player", true)
-	# Two idle training dummies to test weapons on.
-	world.add_player(2, 5, "Dummy", false)
-	world.add_player(3, 3, "Dummy", false)
-	var pids: Array[int] = [1, 2, 3]
+	# Idle training dummies to test weapons on (debug arg --dummies=N).
+	var dummies: int = 2
+	if OS.is_debug_build():
+		for a2: String in OS.get_cmdline_user_args():
+			if a2.begins_with("--dummies="):
+				dummies = clampi(a2.trim_prefix("--dummies=").to_int(), 0, 7)
+	var pids: Array[int] = [1]
+	for i: int in range(dummies):
+		world.add_player(2 + i, (i + 1) % Palette.COLOR_COUNT, "Dummy", false)
+		pids.append(2 + i)
 	world.place_players_at_spawns(pids)
 	world.camera.snap_to_target()
 	world.start_fight()

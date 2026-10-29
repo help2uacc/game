@@ -20,3 +20,4 @@ consistent with the PRD was implemented.
 15. **Reconnect window expiry on the client** (§5.5): when 60 s of retries fail, the client returns to the main menu with "Host left the game".
 16. **Subnet mask for the sweep** (§5.2): Godot cannot read interface netmasks without native code, so every private IPv4 interface is assumed to be a /24 (the usual home Wi-Fi / Android hotspot setup).
 17. **Discovery of incompatible hosts** (§5.2): hosts running another protocol version are not listed (the version check also happens on connect).
+18. **Number of acceptance criteria**: the task description mentions 15 acceptance criteria, PRD §15 lists 14; all 14 are tracked in `PROGRESS.md`.

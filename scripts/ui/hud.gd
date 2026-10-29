@@ -45,6 +45,9 @@ var _score_dirty: bool = true
 var _swipe_start: Vector2 = Vector2.ZERO
 var _swipe_index: int = -1
 var _bottom_center: Control
+var _sb_bg := StyleBoxFlat.new()
+var _sb_fill := StyleBoxFlat.new()
+var _sb_armor := StyleBoxFlat.new()
 
 
 func _ready() -> void:
@@ -413,22 +416,19 @@ func _draw() -> void:
 func _draw_bars(lp: Player, pos: Vector2, s: float) -> void:
 	var w: float = BAR_W * s
 	var h: float = BAR_H * s
-	var bg := StyleBoxFlat.new()
-	bg.bg_color = Color(Palette.INK, 0.55)
-	bg.set_corner_radius_all(int(10 * s))
-	draw_style_box(bg, Rect2(pos - Vector2(4, 4) * s, Vector2(w, h) + Vector2(8, 8) * s))
+	_sb_bg.bg_color = Color(Palette.INK, 0.55)
+	_sb_bg.set_corner_radius_all(int(10 * s))
+	draw_style_box(_sb_bg, Rect2(pos - Vector2(4, 4) * s, Vector2(w, h) + Vector2(8, 8) * s))
 	var hp_frac: float = clampf(float(lp.hp) / float(GameConfig.MAX_HP), 0.0, 1.0)
-	var fill := StyleBoxFlat.new()
-	fill.bg_color = Palette.HEAL if hp_frac > 0.3 else Palette.DANGER
-	fill.set_corner_radius_all(int(8 * s))
+	_sb_fill.bg_color = Palette.HEAL if hp_frac > 0.3 else Palette.DANGER
+	_sb_fill.set_corner_radius_all(int(8 * s))
 	if hp_frac > 0.0:
-		draw_style_box(fill, Rect2(pos, Vector2(w * hp_frac, h)))
+		draw_style_box(_sb_fill, Rect2(pos, Vector2(w * hp_frac, h)))
 	if lp.armor > 0:
 		var a_frac: float = clampf(float(lp.armor) / float(GameConfig.MAX_HP), 0.0, 1.0)
-		var arm := StyleBoxFlat.new()
-		arm.bg_color = Color(Palette.ARMOR, 0.95)
-		arm.set_corner_radius_all(int(8 * s))
-		draw_style_box(arm, Rect2(pos + Vector2(0, h * 0.45), Vector2(w * a_frac, h * 0.55)))
+		_sb_armor.bg_color = Color(Palette.ARMOR, 0.95)
+		_sb_armor.set_corner_radius_all(int(8 * s))
+		draw_style_box(_sb_armor, Rect2(pos + Vector2(0, h * 0.45), Vector2(w * a_frac, h * 0.55)))
 	var font: Font = get_theme_default_font()
 	var txt: String = "%d" % lp.hp + ("  +%d" % lp.armor if lp.armor > 0 else "")
 	draw_string_outline(font, pos + Vector2(12, h - 7) * Vector2(1, 1), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, int(26 * s), int(8 * s), Palette.INK)

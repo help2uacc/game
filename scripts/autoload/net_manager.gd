@@ -231,7 +231,7 @@ func _process(delta: float) -> void:
 			reconnecting = false
 			clear_session()
 			close()
-			left_game.emit("Host left the game")
+			left_game.emit("Host left the game")  # TODO(PRD): message when the reconnect window expires
 		elif _retry_t >= GameConfig.RECONNECT_RETRY_INTERVAL and not _accepted:
 			_retry_t = 0.0
 			join(last_host_ip, true)

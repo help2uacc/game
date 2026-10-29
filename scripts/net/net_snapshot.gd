@@ -4,6 +4,8 @@ extends RefCounted
 ## position, velocity, facing, HP, armor, weapon id, ammo, animation state
 ## (grounded/aim), alive flag and input ack; plus projectiles, pickups,
 ## moving platforms and crates. 8 players ≈ 0.6 KB (budget 2 KB, §12).
+## TODO(PRD): used instead of MultiplayerSynchronizer/Spawner ("equivalent packed RPC"); clients
+## create entity visuals from the snapshot lists.
 
 const P_ALIVE := 1
 const P_FACING_RIGHT := 2

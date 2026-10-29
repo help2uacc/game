@@ -49,7 +49,7 @@ func _poll_responder() -> void:
 		if pkt.is_empty() or str(pkt["t"]) != DiscoveryProtocol.TYPE_DISCOVER:
 			continue
 		if not DiscoveryProtocol.is_compatible(pkt):
-			continue
+			continue  # TODO(PRD): incompatible versions are not answered / listed
 		_responder.set_dest_address(ip, port)
 		_responder.put_packet(_host_info())
 

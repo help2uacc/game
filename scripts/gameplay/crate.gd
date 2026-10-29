@@ -1,6 +1,7 @@
 class_name Crate
 extends StaticBody3D
 ## Destructible crate (PRD §10.1): 30 HP, any damage source damages it.
+## TODO(PRD): "destroyed by any damage source" read as: every source deals damage; explosions destroy outright.
 
 signal destroyed(crate: Crate)
 

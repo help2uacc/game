@@ -21,7 +21,7 @@ const MASK_WORLD := 1
 const MASK_PLAYERS := 2
 const MUZZLE_FORWARD := 0.6
 const MUZZLE_HEIGHT := 1.15
-const THROW_UP_VELOCITY := 4.0
+const THROW_UP_VELOCITY := 4.0  # TODO(PRD): "slight upward arc" has no value
 const GRENADE_RESTITUTION := 0.5
 const SPIKE_BOUNCE_VELOCITY := GameConfig.JUMP_VELOCITY  # TODO(PRD): spike bounce strength
 const PICKUP_GRAVITY := GameConfig.GRAVITY
@@ -51,6 +51,7 @@ var _next_entity_id: int = 1
 var _weapon_spawn_t: float = 0.0
 var _item_spawn_t: float = 0.0
 var _items_started: bool = false
+var _idle_input := PlayerInput.new()
 
 # Client replication (§5.6): snapshot buffer rendered 100 ms in the past.
 var last_snapshot: Dictionary = {}
@@ -157,7 +158,11 @@ func alive_players() -> Array[Player]:
 
 
 func alive_count() -> int:
-	return alive_players().size()
+	var n: int = 0
+	for p: Player in players.values():
+		if p.alive:
+			n += 1
+	return n
 
 
 ## Places every player on a distinct random spawn point (§7.5).
@@ -334,25 +339,24 @@ func _server_step(delta: float) -> void:
 	sim_time += delta
 	for m: MovingPlatform in map.movers:
 		m.server_step(delta)
-	var idle := PlayerInput.new()
 	for p: Player in players.values():
 		if not p.alive:
 			continue
 		var inp: PlayerInput = inputs[p.pid]
-		var edges: Dictionary = p.consume_edges(inp)
+		var edges: int = p.consume_edges(inp)
 		if frozen:
-			p.simulate_movement(idle, false, delta, map)
+			p.simulate_movement(_idle_input, false, delta, map)
 		else:
-			p.simulate_movement(inp, edges["jump"], delta, map)
+			p.simulate_movement(inp, edges & Player.EDGE_JUMP != 0, delta, map)
 		_check_hazards(p)
 		if not p.alive:
 			continue
 		p.fire_cooldown = maxf(0.0, p.fire_cooldown - delta)
 		if frozen:
 			continue
-		if edges["pickup"]:
+		if edges & Player.EDGE_PICKUP != 0:
 			try_pickup_weapon(p)
-		if edges["throw"]:
+		if edges & Player.EDGE_THROW != 0:
 			throw_weapon(p)
 		if inp.attack_held and p.fire_cooldown <= 0.0:
 			attack(p)
@@ -421,7 +425,7 @@ func kill_player(p: Player, lethal_attacker: int, cause: int) -> void:
 	p.hp = 0
 	p.velocity = Vector3.ZERO
 	p.collision_layer = 0
-	if p.weapon_id != 0:
+	if p.weapon_id != 0:  # TODO(PRD): held weapon on death is not specified; it disappears
 		p.weapon_id = 0
 		p.ammo = 0
 	var credited: int = kill_credit.resolve(p.pid, lethal_attacker, sim_time)
@@ -488,6 +492,7 @@ func attack(p: Player) -> void:
 func punch(p: Player) -> void:
 	var w: WeaponData = WeaponDB.weapon(WeaponDB.PUNCH_ID)
 	p.fire_cooldown = w.cooldown()
+	# TODO(PRD): reach measured from the attacker centre to the target capsule edge.
 	var reach: float = w.weapon_range + GameConfig.PLAYER_RADIUS
 	var best: Player = null
 	var best_dx: float = INF
@@ -557,6 +562,7 @@ func _fire_hitscan(p: Player, w: WeaponData, origin: Vector3, muzzle: Vector3, d
 	var hit_players: Dictionary = {}
 	var exclude: Array[RID] = [p.get_rid()]
 	var cause: int = w.id
+	# TODO(PRD): spread read as the full cone angle (±spread/2 per shot/pellet).
 	for i: int in range(maxi(1, w.pellets)):
 		var angle: float = deg_to_rad(rng.randf_range(-w.spread_deg * 0.5, w.spread_deg * 0.5))
 		var d: Vector3 = dir.rotated(Vector3(0, 0, 1), angle)
@@ -611,6 +617,7 @@ func explode(pos: Vector3, owner_pid: int, w: WeaponData, direct_victim: Player)
 			continue
 		if o.pid == owner_pid:
 			dmg = int(round(float(dmg) * w.self_damage_factor))
+		# TODO(PRD): full weapon knockback for every damaged player (not distance scaled).
 		var kb_dir: Vector3 = (c - pos)
 		if kb_dir.length() < 0.05:
 			kb_dir = Vector3(0, 1, 0)
@@ -851,6 +858,7 @@ func throw_weapon(p: Player) -> bool:
 
 
 ## Items are picked up automatically on touch (§7.4).
+## TODO(PRD): also picked up when HP/armor is already full.
 func _auto_pickup_items(p: Player) -> void:
 	for pk: PickupState in pickups.values():
 		if pk.is_weapon() or not overlaps_pickup(p, pk):

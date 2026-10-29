@@ -20,6 +20,7 @@ var _sky_mat: ShaderMaterial
 
 func _ready() -> void:
 	fov = GameConfig.CAMERA_FOV
+	# TODO(PRD): FOV 40° at 30 m shows 21.8 m, not exactly "about 24 m"; FOV is applied horizontally.
 	keep_aspect = Camera3D.KEEP_WIDTH
 	near = 1.0
 	far = 200.0

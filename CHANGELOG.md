@@ -49,3 +49,9 @@
 - Settings screen/overlay (name, Master/Music/SFX, joystick sensitivity, vibration, Low/Medium/High quality, HUD element toggles, HUD scale, reset), persisted to `user://settings.cfg`, toggle switch icons.
 - Full HUD: HP + armor bar, weapon icon + ammo, ROUND x / y, timer (red in last 30 s, ticks in last 10 s), alive counter, top-3 scoreboard (+ local), kill feed (4 entries, 5 s, hazard icon), off-screen enemy arrows, ping, FPS (off by default), damage numbers, 3-2-1-FIGHT!, auto-aim target brackets, safe-area aware corners, HUD scale.
 - Toasts and overlays, footstep SFX, keep-screen-on only during matches, lobby ready button states, quality presets wired (render scale, particles, decorations, parallax, remote blob shadows).
+
+## M7 — Android & performance
+- Performance pass: allocation-free input edges and alive counting in the simulation loop, cached HUD styleboxes, pooled VFX; measured ≤ 85 draw calls and ≤ 14 k primitives per frame with 8 players on every map (High, 1080p) via `tools/preview/perf.gd`.
+- Debug overlay (F3 / 4-finger tap, debug builds): FPS, draw calls, primitives, ping, snapshot size.
+- Android export verified locally with the official 4.7.2 templates (both ABIs, permissions, package name, icons; 59.3 MB APK); GitHub Actions workflow builds, signs (debug) and attaches the APK to tag releases.
+- `TODO(PRD)` markers for every documented PRD gap; README (engine version, editor/multi-instance testing, APK install, new builds, release keystore), acceptance checklist with manual phone test steps in `PROGRESS.md`.

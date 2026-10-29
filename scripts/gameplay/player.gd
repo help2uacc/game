@@ -111,12 +111,20 @@ func is_knocked() -> bool:
 
 ## Rising-edge helpers for latched "pressed" flags (the client keeps sending
 ## a press until acknowledged, so the server only reacts to the rising edge).
-func consume_edges(inp: PlayerInput) -> Dictionary:
-	var e: Dictionary = {
-		"jump": inp.jump_pressed and not _prev_jump_pressed,
-		"pickup": inp.pickup_pressed and not _prev_pickup_pressed,
-		"throw": inp.throw_pressed and not _prev_throw_pressed,
-	}
+## Returns a bit mask of EDGE_* flags (no allocation in the hot path).
+const EDGE_JUMP := 1
+const EDGE_PICKUP := 2
+const EDGE_THROW := 4
+
+
+func consume_edges(inp: PlayerInput) -> int:
+	var e: int = 0
+	if inp.jump_pressed and not _prev_jump_pressed:
+		e |= EDGE_JUMP
+	if inp.pickup_pressed and not _prev_pickup_pressed:
+		e |= EDGE_PICKUP
+	if inp.throw_pressed and not _prev_throw_pressed:
+		e |= EDGE_THROW
 	_prev_jump_pressed = inp.jump_pressed
 	_prev_pickup_pressed = inp.pickup_pressed
 	_prev_throw_pressed = inp.throw_pressed
