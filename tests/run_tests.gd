@@ -1,0 +1,56 @@
+extends SceneTree
+## Headless test runner: godot --headless -s tests/run_tests.gd
+## Runs every test_*() method of every res://tests/test_*.gd script.
+## Exit code 0 = all passed, 1 = failures.
+
+var _started: bool = false
+
+
+func _process(_delta: float) -> bool:
+	if _started:
+		return false
+	_started = true
+	_run.call_deferred()
+	return false
+
+
+func _run() -> void:
+	var files: PackedStringArray = []
+	var dir := DirAccess.open("res://tests")
+	if dir == null:
+		printerr("Cannot open res://tests")
+		quit(1)
+		return
+	for f: String in dir.get_files():
+		if f.begins_with("test_") and f.ends_with(".gd") and f != "test_case.gd":
+			files.append(f)
+	files.sort()
+	var total: int = 0
+	var failed: int = 0
+	for f: String in files:
+		var script: GDScript = load("res://tests/" + f)
+		if script == null:
+			printerr("FAILED to load %s" % f)
+			failed += 1
+			continue
+		var methods: Array[String] = []
+		for m: Dictionary in script.get_script_method_list():
+			var mname: String = m["name"]
+			if mname.begins_with("test_") and not methods.has(mname):
+				methods.append(mname)
+		methods.sort()
+		for mname: String in methods:
+			var inst: TestCase = script.new()
+			inst.current_test = "%s::%s" % [f.get_basename(), mname]
+			var result: Variant = inst.call(mname)
+			if result is Object and (result as Object).get_class() == "GDScriptFunctionState":
+				printerr("Async tests are not supported: %s" % inst.current_test)
+			total += 1
+			if inst.failures.is_empty():
+				print("  PASS %s" % inst.current_test)
+			else:
+				failed += 1
+				for msg: String in inst.failures:
+					printerr("  FAIL %s" % msg)
+	print("Tests: %d run, %d failed" % [total, failed])
+	quit(1 if failed > 0 else 0)

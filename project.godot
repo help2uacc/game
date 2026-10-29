@@ -1,0 +1,62 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="Block Brawl"
+config/version="1.0.0"
+run/main_scene="res://scenes/main/main.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+run/max_fps=60
+boot_splash/bg_color=Color(0.8627451, 0.92156863, 1, 1)
+boot_splash/image="res://assets/branding/splash.png"
+boot_splash/fullsize=true
+boot_splash/use_filter=true
+config/icon="res://assets/branding/icon.png"
+
+[autoload]
+
+Settings="*res://scripts/autoload/settings.gd"
+AudioManager="*res://scripts/autoload/audio_manager.gd"
+GameState="*res://scripts/autoload/game_state.gd"
+NetManager="*res://scripts/autoload/net_manager.gd"
+LanDiscovery="*res://scripts/autoload/lan_discovery.gd"
+MatchManager="*res://scripts/autoload/match_manager.gd"
+SceneRouter="*res://scripts/autoload/scene_router.gd"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=4
+window/energy_saving/keep_screen_on=true
+window/vsync/vsync_mode=1
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
+
+[physics]
+
+common/physics_ticks_per_second=60
+3d/physics_engine="GodotPhysics3D"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
+lights_and_shadows/directional_shadow/size=256
+anti_aliasing/quality/msaa_3d=0
+environment/defaults/default_clear_color=Color(0.8627451, 0.92156863, 1, 1)
