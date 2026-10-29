@@ -10,10 +10,10 @@ size = Vector3(0.14, 0.14, 0.14)
 _data = [Vector2(0, 0.2), 0.0, 0.0, 0, 0, Vector2(0.5, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
 point_count = 3
 
-[node name="Lava" type="Node3D" unique_id=1535597873]
+[node name="Lava" type="Node3D" unique_id=905766962]
 script = ExtResource("1_7rfv8")
 
-[node name="Bubbles" type="CPUParticles3D" parent="." unique_id=1577109838]
+[node name="Bubbles" type="CPUParticles3D" parent="." unique_id=2056366798]
 material_override = ExtResource("2_kab50")
 amount = 6
 lifetime = 1.2

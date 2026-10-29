@@ -37,6 +37,14 @@ func _setup_theme() -> void:
 		bold.base_font = ThemeDB.fallback_font
 		bold.variation_embolden = 0.7
 		t.default_font = bold
+		# Toggle icons are set here (not in the .tres) so the theme has no
+		# dependency on imported textures when the project is first opened.
+		var on: Texture2D = load("res://assets/ui/icons/toggle_on.svg")
+		var off: Texture2D = load("res://assets/ui/icons/toggle_off.svg")
+		t.set_icon("checked", "CheckButton", on)
+		t.set_icon("unchecked", "CheckButton", off)
+		t.set_icon("checked_disabled", "CheckButton", on)
+		t.set_icon("unchecked_disabled", "CheckButton", off)
 
 
 func _apply_render_scale() -> void:

@@ -18,13 +18,13 @@ _surfaces = [{
 [sub_resource type="BoxMesh" id="BoxMesh_2lask"]
 size = Vector3(0.1, 0.1, 0.1)
 
-[node name="RocketProjectile" type="Node3D" unique_id=1768933797]
+[node name="RocketProjectile" type="Node3D" unique_id=1203241878]
 
-[node name="Mesh" type="MeshInstance3D" parent="." unique_id=458813278]
+[node name="Mesh" type="MeshInstance3D" parent="." unique_id=486938645]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_hxjf7")
 
-[node name="Trail" type="CPUParticles3D" parent="." unique_id=1993751363]
+[node name="Trail" type="CPUParticles3D" parent="." unique_id=1729114324]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.25, 0, 0)
 material_override = ExtResource("2_2lask")
 amount = 16

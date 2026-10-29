@@ -35,67 +35,67 @@ size = Vector3(0.22, 0.16, 0.05)
 [sub_resource type="PlaneMesh" id="PlaneMesh_n573r"]
 size = Vector2(0.9, 0.9)
 
-[node name="Stickman" type="Node3D" unique_id=1023803820]
+[node name="Stickman" type="Node3D" unique_id=1186040842]
 script = ExtResource("1_4ongm")
 
-[node name="Flip" type="Node3D" parent="." unique_id=574943649]
+[node name="Flip" type="Node3D" parent="." unique_id=1724141102]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 
-[node name="Body" type="Node3D" parent="Flip" unique_id=1587002669]
+[node name="Body" type="Node3D" parent="Flip" unique_id=853668033]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.9, 0)
 
-[node name="LegFront" type="Node3D" parent="Flip/Body" unique_id=76206106]
+[node name="LegFront" type="Node3D" parent="Flip/Body" unique_id=1609492449]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.08, 0.55, 0)
 
-[node name="Mesh" type="MeshInstance3D" parent="Flip/Body/LegFront" unique_id=1960864454]
+[node name="Mesh" type="MeshInstance3D" parent="Flip/Body/LegFront" unique_id=343414757]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.275, 0)
 cast_shadow = 0
 mesh = SubResource("BoxMesh_4ongm")
 
-[node name="LegBack" type="Node3D" parent="Flip/Body" unique_id=1844164693]
+[node name="LegBack" type="Node3D" parent="Flip/Body" unique_id=1588006538]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.08, 0.55, 0)
 
-[node name="Mesh" type="MeshInstance3D" parent="Flip/Body/LegBack" unique_id=878572180]
+[node name="Mesh" type="MeshInstance3D" parent="Flip/Body/LegBack" unique_id=935821140]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.275, 0)
 cast_shadow = 0
 mesh = SubResource("BoxMesh_4ongm")
 
-[node name="Torso" type="MeshInstance3D" parent="Flip/Body" unique_id=786955847]
+[node name="Torso" type="MeshInstance3D" parent="Flip/Body" unique_id=566414503]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
 cast_shadow = 0
 mesh = SubResource("BoxMesh_7xu7w")
 
-[node name="Head" type="MeshInstance3D" parent="Flip/Body" unique_id=1361775224]
+[node name="Head" type="MeshInstance3D" parent="Flip/Body" unique_id=373828202]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, 0)
 cast_shadow = 0
 mesh = SubResource("BoxMesh_o6ce1")
 
-[node name="Eyes" type="MeshInstance3D" parent="Flip/Body/Head" unique_id=1649163055]
+[node name="Eyes" type="MeshInstance3D" parent="Flip/Body/Head" unique_id=1298433194]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_vn1vp")
 
-[node name="ArmFront" type="Node3D" parent="Flip/Body" unique_id=1721950596]
+[node name="ArmFront" type="Node3D" parent="Flip/Body" unique_id=490711209]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15, 1.12, 0)
 
-[node name="Mesh" type="MeshInstance3D" parent="Flip/Body/ArmFront" unique_id=895787045]
+[node name="Mesh" type="MeshInstance3D" parent="Flip/Body/ArmFront" unique_id=2092156674]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.225, 0)
 cast_shadow = 0
 mesh = SubResource("BoxMesh_jhlp1")
 
-[node name="Hand" type="Marker3D" parent="Flip/Body/ArmFront" unique_id=532765021]
+[node name="Hand" type="Marker3D" parent="Flip/Body/ArmFront" unique_id=1701239820]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.42, 0)
 
-[node name="ArmBack" type="Node3D" parent="Flip/Body" unique_id=20183281]
+[node name="ArmBack" type="Node3D" parent="Flip/Body" unique_id=313421844]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 1.12, 0)
 
-[node name="Mesh" type="MeshInstance3D" parent="Flip/Body/ArmBack" unique_id=260637510]
+[node name="Mesh" type="MeshInstance3D" parent="Flip/Body/ArmBack" unique_id=1043715923]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.225, 0)
 cast_shadow = 0
 mesh = SubResource("BoxMesh_jhlp1")
 
-[node name="WeaponHolder" type="Node3D" parent="." unique_id=1814057161]
+[node name="WeaponHolder" type="Node3D" parent="." unique_id=391721239]
 
-[node name="NameTag" type="Label3D" parent="." unique_id=1263095807]
+[node name="NameTag" type="Label3D" parent="." unique_id=1094235110]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.05, 0)
 pixel_size = 0.006
 billboard = 1
@@ -108,13 +108,13 @@ text = "Player"
 font_size = 40
 outline_size = 14
 
-[node name="LocalMarker" type="MeshInstance3D" parent="NameTag" unique_id=1958587158]
+[node name="LocalMarker" type="MeshInstance3D" parent="NameTag" unique_id=468830519]
 transform = Transform3D(-1, 8.742278e-08, 0, -8.742278e-08, -1, 0, 0, 0, 1, 0, 0.26, 0)
 material_override = ExtResource("3_o6ce1")
 cast_shadow = 0
 mesh = SubResource("PrismMesh_k5xcg")
 
-[node name="BlobShadow" type="MeshInstance3D" parent="." unique_id=291740897]
+[node name="BlobShadow" type="MeshInstance3D" parent="." unique_id=2119680400]
 material_override = ExtResource("4_vn1vp")
 cast_shadow = 0
 mesh = SubResource("PlaneMesh_n573r")
