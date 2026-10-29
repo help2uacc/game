@@ -85,7 +85,9 @@ uploads it as a workflow artifact.
   The run then creates a GitHub Release for that tag with
   `block_brawl.apk` attached.
 - **Manual build:** *Actions → Android APK → Run workflow* (the APK is
-  available as the `block_brawl-apk` artifact of the run).
+  available as the `block_brawl-apk` artifact of the run). Fill in
+  *release_tag* (e.g. `v1.0.1`) to also create that tag and a GitHub
+  Release with the APK.
 
 ### Release keystore (optional)
 
