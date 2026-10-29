@@ -15,9 +15,8 @@ warnings-as-errors lint, map validation).
 - [x] M7 Android & performance
 
 ## Current state
-All milestones are implemented and committed. Remaining: publish — push the
-branch, push tag `v1.0.0` and let `.github/workflows/android.yml` attach
-`block_brawl.apk` to the GitHub Release (see "Release status" below).
+All milestones are implemented, pushed and released as v1.0.0. Remaining:
+the manual phone tests below.
 
 Verified locally (this environment):
 - `tools/check.sh`: headless import clean, 71 tests pass, lint clean, 12 maps valid.
@@ -26,7 +25,8 @@ Verified locally (this environment):
 - Local Android export with the official 4.7.2 templates and a stubbed SDK: the APK packages fine (59.3 MB, both ABIs, permissions + package name present in the manifest). Real signing happens in CI with the runner's Android SDK.
 
 ## Release status
-- Pushing to `help2uacc/game` from this cloud session returned HTTP 403 ("Claude doesn't have GitHub access to help2uacc/game"), so the commits and tag `v1.0.0` exist only locally until access is fixed. Once pushed, the tag build creates the Release.
+- Released: <https://github.com/help2uacc/game/releases/tag/v1.0.0> with `block_brawl.apk` (59.3 MB, debug-signed), built by `.github/workflows/android.yml` run 40895761621.
+- Note: pushing tags from the cloud session is blocked by its git proxy, so the tag was created by the workflow (manual run with `release_tag=v1.0.0`). Pushing a `v*` tag from a normal machine also works.
 
 ## Acceptance criteria (PRD §15)
 
