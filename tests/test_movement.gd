@@ -168,3 +168,22 @@ func test_hold_down_drops_through_platform() -> void:
 	w.set_input(1, inp)
 	await physics_frames(50)
 	assert_near(p.global_position.y, 2.0, 0.08, "dropped by holding down")
+
+
+func test_holding_up_double_jumps() -> void:
+	var w: World = _world()
+	var p: Player = _spawn(w, Vector3(10.5, 2.2, 0))
+	await physics_frames(20)
+	var start_y: float = p.global_position.y
+	var inp := PlayerInput.new()
+	inp.jump_pressed = true
+	inp.jump_held = true
+	w.set_input(1, inp)
+	await tree().physics_frame
+	inp.jump_pressed = false
+	w.set_input(1, inp)
+	var apex: float = 0.0
+	for i: int in range(70):
+		await tree().physics_frame
+		apex = maxf(apex, p.global_position.y)
+	assert_true(apex - start_y > 121.0 / 60.0 + 1.2, "held up: double jump at the apex (%f)" % (apex - start_y))

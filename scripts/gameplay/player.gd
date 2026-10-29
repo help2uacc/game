@@ -46,6 +46,8 @@ var _wants_drop: bool = false
 var _down_hold_t: float = 0.0
 ## v1.2: holding down this long on a one-way platform drops through it.
 const DROP_HOLD_TIME := 0.15
+## v1.3: with jump held, the double jump triggers once rising speed drops to this.
+const HOLD_DOUBLE_JUMP_VY := 1.5
 var _was_grounded: bool = false
 
 var stickman: Stickman
@@ -194,6 +196,12 @@ func simulate_movement(inp: PlayerInput, jump_edge: bool, delta: float, map: Gam
 			double_jump_ready = false
 			jump_buffer_t = 0.0
 			jumped.emit(self, true)
+	elif inp.jump_held and not grounded and double_jump_ready and coyote_t <= 0.0 \
+			and velocity.y <= HOLD_DOUBLE_JUMP_VY and drop_t <= 0.0:
+		# v1.3: keep holding up and the double jump fires near the apex.
+		velocity.y = GameConfig.DOUBLE_JUMP_VELOCITY
+		double_jump_ready = false
+		jumped.emit(self, true)
 	# Gravity.
 	velocity.y = maxf(velocity.y - GameConfig.GRAVITY * delta, -GameConfig.MAX_FALL_SPEED)
 	velocity.z = 0.0

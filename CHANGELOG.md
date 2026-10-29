@@ -72,3 +72,8 @@
 - Restyled round action buttons (pink Attack, gold Pick Up, blue Throw) with rim, shadow, highlight and captions; nicer aim stick and joystick; joystick ghost always visible.
 - Android controls fix: safe-area insets are validated and clamped (some Android versions report a portrait/empty safe area in landscape, which could push controls off-screen); low-contrast 35 % white buttons replaced by opaque coloured ones.
 - Test runner releases audio/static caches before exit; tests for joystick jump, hold-to-hop, hold-down drop and sandbox restart (80 tests).
+
+## v1.3.0 — Owner change requests
+- Epic ("حماسی") music: `tools/gen_music.py` rewritten — minor-key anthems with driving drums, tom fills, war-drum booms, crashes, saw bass, power-chord pads, brass lead, arpeggios and reverb; triumphant results fanfare.
+- Hold the joystick up after a jump and the double jump fires near the apex.
+- Dramatic weapon SFX: layered crack/body/sub-thump/echo for pistol, SMG, shotgun, sniper, rocket and a bigger explosion; louder mastering; oldest-voice stealing so rapid fire is never silent. `tools/synth.py` gained reverb, saturation and high-pass helpers.

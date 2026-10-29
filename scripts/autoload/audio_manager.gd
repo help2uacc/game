@@ -86,6 +86,27 @@ func _active_voices(sfx_name: String) -> int:
 	return n
 
 
+## Max 4 simultaneous voices per SFX (§11.5): at the limit the oldest voice
+## of that SFX is stopped so the newest shot is always heard (v1.3).
+func _steal_if_full(sfx_name: String) -> void:
+	if _active_voices(sfx_name) < MAX_VOICES_PER_SFX:
+		return
+	var oldest: Node = null
+	var best_pos: float = -1.0
+	for p: Node in _voice_name.keys():
+		if _voice_name[p] != sfx_name or not _is_playing(p):
+			continue
+		var pos: float = (p as AudioStreamPlayer).get_playback_position() if p is AudioStreamPlayer \
+				else (p as AudioStreamPlayer3D).get_playback_position()
+		if pos > best_pos:
+			best_pos = pos
+			oldest = p
+	if oldest is AudioStreamPlayer:
+		(oldest as AudioStreamPlayer).stop()
+	elif oldest is AudioStreamPlayer3D:
+		(oldest as AudioStreamPlayer3D).stop()
+
+
 func _is_playing(p: Node) -> bool:
 	if p is AudioStreamPlayer:
 		return (p as AudioStreamPlayer).playing
@@ -95,8 +116,9 @@ func _is_playing(p: Node) -> bool:
 ## UI / non-positional sound.
 func play_ui(sfx_name: String, pitch: float = 1.0, volume_db: float = 0.0) -> void:
 	var stream: AudioStream = _stream(SFX_DIR + sfx_name + ".wav")
-	if stream == null or _active_voices(sfx_name) >= MAX_VOICES_PER_SFX:
+	if stream == null:
 		return
+	_steal_if_full(sfx_name)
 	for p: AudioStreamPlayer in _pool_2d:
 		if not p.playing:
 			p.stream = stream
@@ -110,8 +132,9 @@ func play_ui(sfx_name: String, pitch: float = 1.0, volume_db: float = 0.0) -> vo
 ## Positional in-world sound (distance attenuation).
 func play_at(sfx_name: String, pos: Vector3, pitch: float = 1.0, volume_db: float = 0.0) -> void:
 	var stream: AudioStream = _stream(SFX_DIR + sfx_name + ".wav")
-	if stream == null or _active_voices(sfx_name) >= MAX_VOICES_PER_SFX:
+	if stream == null:
 		return
+	_steal_if_full(sfx_name)
 	for p: AudioStreamPlayer3D in _pool_3d:
 		if not p.playing:
 			p.stream = stream

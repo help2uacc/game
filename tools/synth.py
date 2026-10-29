@@ -122,3 +122,41 @@ def write_wav(path: Path, x: np.ndarray, sr: int):
 
 def note_freq(midi: float) -> float:
     return 440.0 * 2 ** ((midi - 69) / 12.0)
+
+
+def highpass_fast(x: np.ndarray, cutoff: float, sr: int) -> np.ndarray:
+    spec = np.fft.rfft(x)
+    freqs = np.fft.rfftfreq(len(x), 1.0 / sr)
+    spec *= 1.0 / np.sqrt(1.0 + (cutoff / np.maximum(freqs, 1.0)) ** 4)
+    return np.fft.irfft(spec, len(x))
+
+
+def reverb(x: np.ndarray, sr: int, room: float = 0.35, wet: float = 0.25, wrap: bool = False) -> np.ndarray:
+    """Cheap multi-tap feedback reverb (deterministic). `wrap` keeps loops seamless."""
+    taps = [(0.029, 0.6), (0.037, 0.55), (0.053, 0.5), (0.071, 0.45), (0.089, 0.4), (0.113, 0.33)]
+    n = len(x)
+    out = np.zeros(n + (0 if wrap else int(sr * 1.5)))
+    out[:n] += x
+    tail = np.zeros_like(out)
+    for delay, gain in taps:
+        d = int(delay * sr * (1.0 + room))
+        g = gain * room
+        y = x.copy()
+        for k in range(1, 6):
+            shift = d * k
+            amp = g ** k
+            if amp < 0.002:
+                break
+            if wrap:
+                tail += np.roll(np.pad(y, (0, len(out) - n)), shift) * amp
+            else:
+                if shift < len(tail):
+                    seg = y[: len(tail) - shift]
+                    tail[shift:shift + len(seg)] += seg * amp
+    tail = lowpass_fast(tail, 4000, sr)
+    return out * (1.0 - wet * 0.3) + tail * wet
+
+
+def saturate(x: np.ndarray, drive: float = 2.0) -> np.ndarray:
+    """Soft clipping for punch and grit."""
+    return np.tanh(x * drive) / np.tanh(drive)
