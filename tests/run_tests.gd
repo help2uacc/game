@@ -42,9 +42,10 @@ func _run() -> void:
 		for mname: String in methods:
 			var inst: TestCase = script.new()
 			inst.current_test = "%s::%s" % [f.get_basename(), mname]
-			var result: Variant = inst.call(mname)
-			if result is Object and (result as Object).get_class() == "GDScriptFunctionState":
-				printerr("Async tests are not supported: %s" % inst.current_test)
+			# Tests may be coroutines (await physics frames); awaiting a plain
+			# return value is a no-op.
+			await inst.call(mname)
+			inst.cleanup()
 			total += 1
 			if inst.failures.is_empty():
 				print("  PASS %s" % inst.current_test)

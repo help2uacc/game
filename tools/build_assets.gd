@@ -193,17 +193,17 @@ func _own(node: Node, owner_node: Node) -> void:
 		_own(c, owner_node)
 
 
-func _pack(root: Node, path: String) -> void:
-	for c: Node in root.get_children():
-		_own(c, root)
+func _pack(top: Node, path: String) -> void:
+	for c: Node in top.get_children():
+		_own(c, top)
 	var ps := PackedScene.new()
-	var err: int = ps.pack(root)
+	var err: int = ps.pack(top)
 	if err != OK:
 		printerr("pack failed for %s" % path)
 		_errors += 1
 		return
 	_save(ps, path)
-	root.free()
+	top.free()
 
 
 func _box_mesh(size: Vector3) -> BoxMesh:
@@ -227,13 +227,13 @@ func _vmesh(boxes: Array) -> ArrayMesh:
 
 # ---------------------------------------------------------------- stickman
 func _build_stickman() -> void:
-	var root := Node3D.new()
-	root.name = "Stickman"
-	root.set_script(load("res://scripts/visual/stickman.gd"))
+	var top := Node3D.new()
+	top.name = "Stickman"
+	top.set_script(load("res://scripts/visual/stickman.gd"))
 	var flip := Node3D.new()
 	flip.name = "Flip"
 	flip.position = Vector3(0, 0.9, 0)
-	root.add_child(flip)
+	top.add_child(flip)
 	var body := Node3D.new()
 	body.name = "Body"
 	body.position = Vector3(0, -0.9, 0)
@@ -267,7 +267,7 @@ func _build_stickman() -> void:
 			arm.add_child(hand)
 	var holder := Node3D.new()
 	holder.name = "WeaponHolder"
-	root.add_child(holder)
+	top.add_child(holder)
 	var tag := Label3D.new()
 	tag.name = "NameTag"
 	tag.position = Vector3(0, 2.05, 0)
@@ -281,7 +281,7 @@ func _build_stickman() -> void:
 	tag.render_priority = 2
 	tag.outline_render_priority = 1
 	tag.text = "Player"
-	root.add_child(tag)
+	top.add_child(tag)
 	var marker_mesh := PrismMesh.new()
 	marker_mesh.size = Vector3(0.22, 0.16, 0.05)
 	var marker := _mesh_node("LocalMarker", marker_mesh, Vector3(0, 0.26, 0))
@@ -292,20 +292,20 @@ func _build_stickman() -> void:
 	plane.size = Vector2(0.9, 0.9)
 	var shadow := _mesh_node("BlobShadow", plane)
 	shadow.material_override = load("res://assets/materials/blob_shadow.tres")
-	root.add_child(shadow)
-	_pack(root, "res://scenes/characters/stickman.tscn")
+	top.add_child(shadow)
+	_pack(top, "res://scenes/characters/stickman.tscn")
 
 
 # ---------------------------------------------------------------- weapons
 func _weapon_scene(file_name: String, boxes: Array, muzzle: Vector3) -> void:
-	var root := Node3D.new()
-	root.name = file_name.to_pascal_case()
-	root.add_child(_mesh_node("Mesh", _vmesh(boxes)))
+	var top := Node3D.new()
+	top.name = file_name.to_pascal_case()
+	top.add_child(_mesh_node("Mesh", _vmesh(boxes)))
 	var m := Marker3D.new()
 	m.name = "Muzzle"
 	m.position = muzzle
-	root.add_child(m)
-	_pack(root, "res://scenes/weapons/%s.tscn" % file_name)
+	top.add_child(m)
+	_pack(top, "res://scenes/weapons/%s.tscn" % file_name)
 
 
 func _build_weapons() -> void:
@@ -388,16 +388,16 @@ func _build_weapons() -> void:
 
 # ---------------------------------------------------------------- pickups
 func _pickup_scene(scene_name: String, boxes: Array) -> void:
-	var root := Node3D.new()
-	root.name = scene_name.to_pascal_case()
-	root.set_script(load("res://scripts/visual/pickup_view.gd"))
+	var top := Node3D.new()
+	top.name = scene_name.to_pascal_case()
+	top.set_script(load("res://scripts/visual/pickup_view.gd"))
 	var model := Node3D.new()
 	model.name = "Model"
 	model.position = Vector3(0, 0.45, 0)
-	root.add_child(model)
+	top.add_child(model)
 	if not boxes.is_empty():
 		model.add_child(_mesh_node("Mesh", _vmesh(boxes)))
-	_pack(root, "res://scenes/pickups/%s.tscn" % scene_name)
+	_pack(top, "res://scenes/pickups/%s.tscn" % scene_name)
 
 
 func _build_pickups() -> void:

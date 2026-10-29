@@ -1,0 +1,7 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/game_screen.gd" id="1_game"]
+
+[node name="Sandbox" type="Node"]
+script = ExtResource("1_game")
+sandbox = true

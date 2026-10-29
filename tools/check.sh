@@ -20,6 +20,14 @@ if grep -E "ERROR|WARNING|SCRIPT ERROR|Parse Error" build/tests.log; then
   echo "tests produced errors/warnings"; status=1
 fi
 
+echo "== GDScript warnings-as-errors lint"
+"$GODOT" --headless -s tools/lint_warnings.gd 2>/dev/null | grep -v "^Godot Engine" > override.cfg
+timeout 120 "$GODOT" --headless -s tools/lint_load_all.gd > build/lint.log 2>&1
+lint_code=$?
+rm -f override.cfg
+grep -E "lint:|LINT FAIL|SCRIPT ERROR|Parse Error|ERROR" build/lint.log | head -40
+if [ $lint_code -ne 0 ]; then echo "lint failed"; status=1; fi
+
 echo "== python3 tools/validate_maps.py"
 python3 tools/validate_maps.py || status=1
 

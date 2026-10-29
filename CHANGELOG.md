@@ -13,3 +13,11 @@
 - Shared materials, `WeaponData`/`ItemData`/`MapTheme` resources (12 themes), GridMap `MeshLibrary`, UI `Theme`.
 - `tools/gen_icons.py` (27 SVG icons), `tools/gen_sfx.py` (40 SFX, 44.1 kHz), `tools/gen_music.py` (menu, 3 battle loops, results jingle, 22.05 kHz), `tools/gen_branding.py`; `tools/build_all.sh` regenerates everything.
 - AudioManager (Master→Music/SFX buses, 2D/3D pools, 4-voice limit, music crossfade).
+
+## M2 — Local sandbox
+- `GameMap`: map JSON → themed GridMap (MeshLibrary blocks, octant batching), background decoration layer (Z −3…−8), far parallax layer (High), lava strips, crates, jump pads, moving platforms, spawn lists, cell queries.
+- `Player` (CharacterBody3D, Z locked): run/accel, gravity, jump, double jump (one per airtime), coyote time + jump buffer, custom one-way platforms with drop-through (down + jump), knockback with 30 % control, kill line.
+- `CameraRig`: FOV 40°, Z +30, −6° tilt, lerp 8/s, look-ahead 2 m, 1 m vertical dead-zone, map clamp with 2 m margin, shake, sky gradient quad.
+- `TouchControls`: floating joystick, Attack/Jump/Pick Up/Throw buttons, multi-touch, latched presses, debug keyboard (A/D/S/Space/J/K/L).
+- `scenes/main/sandbox.tscn` single-player sandbox; first map `candy_plains`; `tools/author_maps.py`.
+- Tests: physics integration tests (floor, jump/double jump heights, one-way + drop-through, knockback, kill line); GDScript warnings-as-errors lint in `tools/check.sh`.

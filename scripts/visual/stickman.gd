@@ -31,7 +31,6 @@ const WEAPON_SCENES: Dictionary = {
 @onready var _body: Node3D = $Flip/Body
 @onready var _torso: MeshInstance3D = $Flip/Body/Torso
 @onready var _head: MeshInstance3D = $Flip/Body/Head
-@onready var _eyes: MeshInstance3D = $Flip/Body/Head/Eyes
 @onready var _arm_f: Node3D = $Flip/Body/ArmFront
 @onready var _arm_b: Node3D = $Flip/Body/ArmBack
 @onready var _leg_f: Node3D = $Flip/Body/LegFront

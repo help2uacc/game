@@ -4,6 +4,30 @@ extends RefCounted
 
 var failures: PackedStringArray = []
 var current_test: String = ""
+var _nodes: Array[Node] = []
+
+
+func tree() -> SceneTree:
+	return Engine.get_main_loop() as SceneTree
+
+
+## Adds a node to the scene tree for the duration of the test.
+func add_node(n: Node) -> Node:
+	tree().root.add_child(n)
+	_nodes.append(n)
+	return n
+
+
+func cleanup() -> void:
+	for n: Node in _nodes:
+		if is_instance_valid(n):
+			n.queue_free()
+	_nodes.clear()
+
+
+func physics_frames(count: int) -> void:
+	for i: int in range(count):
+		await tree().physics_frame
 
 
 func _fail(message: String) -> void:
